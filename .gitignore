@@ -22,4 +22,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
-storage/app/firebase/
+/storage/app/firebase/*
+!/storage/app/firebase/.gitignore
