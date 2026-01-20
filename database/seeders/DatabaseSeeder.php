@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            // Nanti kalau ada AppraisalSeeder dll, tinggal tambah di bawahnya
+            AppraisalSeeder::class,
         ]);
     }
 }

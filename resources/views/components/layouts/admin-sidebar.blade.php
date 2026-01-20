@@ -27,8 +27,8 @@
                 ],
                 [
                     'label' => 'Appraisals',
-                    'route' => '#',
-                    'active' => false,
+                    'route' => route('appraisals.index'),
+                    'active' => request()->routeIs('appraisals.*'),
                     'icon' => 'clipboard-document-check', // Uses heroicon-o-clipboard-document-check
                 ],
                 [
