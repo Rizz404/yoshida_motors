@@ -10,6 +10,7 @@ class AppraisalPhoto extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+    protected $touches = ['appraisalRequest'];
 
     // Relasi balik ke Request
     public function appraisalRequest()

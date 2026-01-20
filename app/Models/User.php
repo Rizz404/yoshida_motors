@@ -13,16 +13,22 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = ['id']; // Semua boleh diisi kecuali ID
+    // /**
+    //  * The attributes that are mass assignable.
+    //  *
+    //  * @var list<string>
+    //  */
+    // protected $fillable = [
+    //     'name',
+    //     'email',
+    //     'password',
+    //     'phone_number',
+    //     'firebase_uid',
+    //     'address',
+    //     'fcm_token',
+    //     'role',
+    // ];
 
     /**
      * The attributes that should be hidden for serialization.

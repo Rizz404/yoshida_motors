@@ -12,6 +12,15 @@ class AppraisalRequest extends Model
     // Biar gak ribet ngetik fillable satu-satu
     protected $guarded = ['id'];
 
+    protected function casts(): array
+    {
+        return [
+            'final_price' => 'float', // Biar jadi angka, bukan string "100000.00"
+            'price_valid_until' => 'datetime', // Biar jadi object Carbon
+            'year_manufacture' => 'integer',
+        ];
+    }
+
     // Relasi ke User (Request ini milik satu User)
     public function user()
     {
@@ -23,4 +32,10 @@ class AppraisalRequest extends Model
     {
         return $this->hasMany(AppraisalPhoto::class);
     }
+
+    // * Anggap aja enum
+    const STATUS_DRAFT = 'draft';
+    const STATUS_SUBMITTED = 'submitted';
+    const STATUS_REVIEW = 'under_review';
+    const STATUS_COMPLETED = 'completed';
 }

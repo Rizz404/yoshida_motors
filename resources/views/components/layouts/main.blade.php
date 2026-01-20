@@ -18,6 +18,7 @@
     {{-- Slot utama buat konten --}}
     {{ $slot }}
 
+    <x-ui.notification />
 </body>
 
 </html>

@@ -1,32 +1,83 @@
 <x-layouts.main :title="$title ?? 'Admin Panel'">
 
-    <div class="min-h-screen flex" x-data="{ sidebarOpen: true }">
+    <div class="flex h-screen bg-neutral-50 overflow-hidden" x-data="{ sidebarOpen: false }">
 
-        {{-- Sidebar Admin --}}
-        <aside x-show="sidebarOpen" class="w-64 bg-gray-800 text-white shrink-0 transition-all duration-300">
-            <div class="p-4 font-bold text-lg border-b border-gray-700">
-                Admin Panel 🛠️
+        {{-- ================= MOBILE SIDEBAR (Off-Canvas) ================= --}}
+        <div x-show="sidebarOpen" class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
+            {{-- Backdrop (Gelap-gelap background) --}}
+            <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0" class="fixed inset-0 bg-neutral-900/80" @click="sidebarOpen = false">
             </div>
-            <nav class="mt-4 px-2 space-y-2">
-                <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">Dashboard</a>
-                <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">Kelola Mobil</a>
-                <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">Laporan</a>
-            </nav>
-        </aside>
 
-        {{-- Konten Utama --}}
-        <div class="flex-1 flex flex-col bg-gray-100">
-            <header class="bg-white shadow p-4 flex justify-between items-center">
-                <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-                <div class="font-semibold text-gray-700">Halo, Admin!</div>
+            {{-- Sidebar Panel Mobile --}}
+            <div x-show="sidebarOpen" x-transition:enter="transition ease-in-out duration-300 transform"
+                x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300 transform"
+                x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+                class="fixed inset-0 flex">
+
+                {{-- Panggil Component Sidebar --}}
+                <div class="relative w-full max-w-xs flex-1 bg-primary-900">
+                    <x-layouts.admin-sidebar />
+
+                    {{-- Tombol Close X --}}
+                    <div class="absolute top-0 right-0 -mr-12 pt-2">
+                        <button type="button"
+                            class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                            @click="sidebarOpen = false">
+                            <span class="sr-only">Close sidebar</span>
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ================= DESKTOP SIDEBAR (Static) ================= --}}
+        {{-- Hidden di mobile, Flex di desktop --}}
+        <div class="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
+            <x-layouts.admin-sidebar />
+        </div>
+
+        {{-- ================= MAIN CONTENT ================= --}}
+        <div class="flex flex-col flex-1 lg:pl-64 w-0 overflow-hidden">
+
+            {{-- Top Header --}}
+            <header
+                class="flex items-center justify-between h-16 px-6 py-4 bg-white border-b border-neutral-200 shadow-sm shrink-0">
+                <div class="flex items-center">
+                    {{-- Hamburger Button (Mobile Only) --}}
+                    <button @click="sidebarOpen = true"
+                        class="text-neutral-500 focus:outline-none lg:hidden hover:text-primary-600 p-2 -ml-2">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h2 class="ml-4 text-lg font-semibold text-neutral-800 lg:ml-0">
+                        {{ $title ?? 'Dashboard' }}
+                    </h2>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="relative flex items-center text-neutral-600">
+                        <span class="mr-2 text-sm font-medium hidden sm:block">Hi, Admin</span>
+                        <div
+                            class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold border border-primary-200">
+                            A
+                        </div>
+                    </div>
+                </div>
             </header>
 
-            <main class="flex-1 p-6 overflow-y-auto">
+            {{-- Main Scrollable Content --}}
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-neutral-50 p-6">
                 {{ $slot }}
             </main>
         </div>

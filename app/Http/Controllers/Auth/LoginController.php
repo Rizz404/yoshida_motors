@@ -8,47 +8,58 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    // 1. Tampilkan Form Login
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // 2. Proses Login
     public function login(Request $request)
     {
-        // Validasi input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Coba Login
-        // attempt() otomatis hash password input & bandingin sama di DB
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
 
-            // Cek Role: Cuma Admin yang boleh masuk sini
+            // Role Authorization Check
             if (Auth::user()->role !== 'admin') {
                 Auth::logout();
-                return back()->withErrors(['email' => 'Kamu bukan Admin! Hush sana! 😤']);
+
+                return back()->with('notify', [
+                    'type' => 'warning',
+                    'title' => 'Access Denied',
+                    'message' => 'You do not have administrative privileges to access this area.',
+                ])->onlyInput('email');
             }
 
-            return redirect()->intended('dashboard');
+            // Successful Login
+            return redirect()->intended('dashboard')->with('notify', [
+                'type' => 'success',
+                'title' => 'Welcome Back',
+                'message' => 'You have successfully logged in.',
+            ]);
         }
 
-        // Kalau gagal
-        return back()->withErrors([
-            'email' => 'Email atau password salah nih, coba inget-inget lagi! 🤔',
+        // Failed Login
+        return back()->with('notify', [
+            'type' => 'error',
+            'title' => 'Authentication Failed',
+            'message' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
 
-    // 3. Logout
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+
+        return redirect('/login')->with('notify', [
+            'type' => 'info',
+            'title' => 'Signed Out',
+            'message' => 'You have been logged out successfully.',
+        ]);
     }
 }
