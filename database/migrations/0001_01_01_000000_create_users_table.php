@@ -13,13 +13,30 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('name')->nullable(); // Boleh null dulu, nanti user update profil
+
+            // EMAIL (Wajib buat Admin, Opsional buat User Mobile)
+            $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->text('address')->nullable(); // Alamat user [cite: 24]
-            $table->string('fcm_token')->nullable(); // Buat Push Notif Firebase [cite: 16]
-            $table->enum('role', ['user', 'admin'])->default('user'); // Pembeda akses Admin/User [cite: 31]
+
+            // PASSWORD (Wajib buat Admin, Opsional buat User Mobile)
+            $table->string('password')->nullable();
+
+            // KHUSUS MOBILE APP (OTP)
+            // Format E.164 (+62...) biar standar internasional
+            $table->string('phone_number')->unique()->nullable();
+
+            // UID dari Firebase (Penting buat verifikasi keamanan) [cite: 86]
+            $table->string('firebase_uid')->unique()->nullable();
+
+            $table->text('address')->nullable();
+
+            // Token FCM buat Push Notif (Kalau user punya banyak device, ini cuma nyimpen yg terakhir)
+            $table->string('fcm_token')->nullable();
+
+            // Role user
+            $table->enum('role', ['user', 'admin'])->default('user');
+
             $table->rememberToken();
             $table->timestamps();
         });

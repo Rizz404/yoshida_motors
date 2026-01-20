@@ -3,7 +3,7 @@
     <div class="min-h-screen flex" x-data="{ sidebarOpen: true }">
 
         {{-- Sidebar Admin --}}
-        <aside x-show="sidebarOpen" class="w-64 bg-gray-800 text-white flex-shrink-0 transition-all duration-300">
+        <aside x-show="sidebarOpen" class="w-64 bg-gray-800 text-white shrink-0 transition-all duration-300">
             <div class="p-4 font-bold text-lg border-b border-gray-700">
                 Admin Panel 🛠️
             </div>
