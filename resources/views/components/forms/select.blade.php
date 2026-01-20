@@ -9,13 +9,10 @@
 
 @php
     $id = $id ?? $name;
-    // Cek error manual atau dari Laravel
     $resolvedError = $error ?? ($errors->has($name) ? $errors->first($name) : null);
 
-    // Styling dasar
     $baseClasses = 'block w-full text-sm rounded-lg shadow-sm transition duration-200 ease-in-out cursor-pointer';
 
-    // State styling (Error vs Normal)
     $stateClasses = $resolvedError
         ? 'border-secondary-300 text-secondary-900 focus:border-secondary-500 focus:ring-secondary-200'
         : 'border-neutral-300 text-neutral-900 focus:border-primary-500 focus:ring-primary-200 focus:ring-opacity-50 hover:border-primary-400';
@@ -38,14 +35,10 @@
             {{ $slot }}
         </select>
 
-        {{-- Icon Error (Kalau dropdown biasanya di kanan agak geser dikit biar gak nabrak panah) --}}
+        {{-- Error Icon --}}
         @if ($resolvedError)
             <div class="absolute inset-y-0 right-8 pr-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-secondary-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clip-rule="evenodd" />
-                </svg>
+                <x-heroicon-s-exclamation-circle class="h-5 w-5 text-secondary-500" />
             </div>
         @endif
     </div>

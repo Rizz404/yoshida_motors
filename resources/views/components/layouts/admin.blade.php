@@ -4,7 +4,7 @@
 
         {{-- ================= MOBILE SIDEBAR (Off-Canvas) ================= --}}
         <div x-show="sidebarOpen" class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
-            {{-- Backdrop (Gelap-gelap background) --}}
+            {{-- Backdrop --}}
             <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
@@ -18,21 +18,17 @@
                 x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
                 class="fixed inset-0 flex">
 
-                {{-- Panggil Component Sidebar --}}
+                {{-- Sidebar Component --}}
                 <div class="relative w-full max-w-xs flex-1 bg-primary-900">
                     <x-layouts.admin-sidebar />
 
-                    {{-- Tombol Close X --}}
+                    {{-- Close Button --}}
                     <div class="absolute top-0 right-0 -mr-12 pt-2">
                         <button type="button"
                             class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                             @click="sidebarOpen = false">
                             <span class="sr-only">Close sidebar</span>
-                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <x-heroicon-o-x-mark class="h-6 w-6 text-white" />
                         </button>
                     </div>
                 </div>
@@ -40,7 +36,6 @@
         </div>
 
         {{-- ================= DESKTOP SIDEBAR (Static) ================= --}}
-        {{-- Hidden di mobile, Flex di desktop --}}
         <div class="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
             <x-layouts.admin-sidebar />
         </div>
@@ -55,10 +50,7 @@
                     {{-- Hamburger Button (Mobile Only) --}}
                     <button @click="sidebarOpen = true"
                         class="text-neutral-500 focus:outline-none lg:hidden hover:text-primary-600 p-2 -ml-2">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
+                        <x-heroicon-o-bars-3 class="w-6 h-6" />
                     </button>
                     <h2 class="ml-4 text-lg font-semibold text-neutral-800 lg:ml-0">
                         {{ $title ?? 'Dashboard' }}

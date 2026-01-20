@@ -3,7 +3,10 @@
         <h1 class="text-2xl font-bold text-neutral-800">Users List</h1>
         <a href="{{ route('users.create') }}">
             <x-forms.button variant="primary">
-                + Add New User
+                <span class="flex items-center">
+                    <x-heroicon-o-plus class="w-5 h-5 mr-1" />
+                    Add New User
+                </span>
             </x-forms.button>
         </a>
     </div>

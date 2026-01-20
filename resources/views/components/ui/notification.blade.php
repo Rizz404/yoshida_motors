@@ -4,22 +4,19 @@
     type: 'success', // success, error, warning, info
     message: '',
     title: '',
-    details: null, // Buat nyimpen stack trace atau error detail
+    details: null,
     showDetails: false,
     timeout: null,
 
     init() {
-        // Dengerin event 'notify' dari window
         window.addEventListener('notify', event => {
             this.trigger(event.detail);
         });
 
-        // Cek kalau ada flash message dari Session Laravel (misal dari Controller)
         @if(session()->has('notify'))
         this.trigger({{ json_encode(session('notify')) }});
         @endif
     },
-
 
     trigger(data) {
         this.show = true;
@@ -29,7 +26,6 @@
         this.details = data.details || null;
         this.showDetails = false;
 
-        // Auto close kalau bukan error (biar user sempet baca errornya)
         if (this.timeout) clearTimeout(this.timeout);
         if (this.type !== 'error') {
             this.timeout = setTimeout(() => { this.close() }, 5000);
@@ -40,7 +36,6 @@
         this.show = false;
     },
 
-    // Mapping warna sesuai palette app.css
     get colors() {
         const colors = {
             success: {
@@ -82,7 +77,7 @@
     class="fixed inset-0 z-50 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start" style="display: none;">
     <div class="w-full flex flex-col items-center space-y-4 sm:items-end">
 
-        <!-- Kartu Notifikasi -->
+        <!-- Notification Card -->
         <div class="max-w-md w-full pointer-events-auto rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden"
             :class="[colors.bg, colors.border, 'border']">
             <div class="p-4">
@@ -91,29 +86,21 @@
                     <!-- Icon -->
                     <div class="shrink-0">
                         <!-- Success Icon -->
-                        <svg x-show="type === 'success'" class="h-6 w-6" :class="colors.icon" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <div x-show="type === 'success'">
+                            <x-heroicon-o-check-circle class="h-6 w-6" ::class="colors.icon" />
+                        </div>
                         <!-- Error Icon -->
-                        <svg x-show="type === 'error'" class="h-6 w-6" :class="colors.icon" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <div x-show="type === 'error'">
+                            <x-heroicon-o-x-circle class="h-6 w-6" ::class="colors.icon" />
+                        </div>
                         <!-- Warning Icon -->
-                        <svg x-show="type === 'warning'" class="h-6 w-6" :class="colors.icon" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+                        <div x-show="type === 'warning'">
+                            <x-heroicon-o-exclamation-triangle class="h-6 w-6" ::class="colors.icon" />
+                        </div>
                         <!-- Info Icon -->
-                        <svg x-show="type === 'info'" class="h-6 w-6" :class="colors.icon" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <div x-show="type === 'info'">
+                            <x-heroicon-o-information-circle class="h-6 w-6" ::class="colors.icon" />
+                        </div>
                     </div>
 
                     <!-- Content -->
@@ -121,7 +108,7 @@
                         <p x-show="title" class="text-sm font-semibold mb-1" :class="colors.text" x-text="title"></p>
                         <p class="text-sm font-medium opacity-90" :class="colors.text" x-text="message"></p>
 
-                        <!-- Tombol Lihat Detail (Stack Trace) -->
+                        <!-- Detail Toggle -->
                         <div x-show="details" class="mt-2">
                             <button @click="showDetails = !showDetails"
                                 class="text-xs font-semibold underline focus:outline-none" :class="colors.text">
@@ -136,12 +123,7 @@
                             class="rounded-md inline-flex focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
                             :class="colors.btn">
                             <span class="sr-only">Close</span>
-                            <svg class="h-5 w-5" :class="colors.text" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <x-heroicon-s-x-mark class="h-5 w-5" ::class="colors.text" />
                         </button>
                     </div>
                 </div>

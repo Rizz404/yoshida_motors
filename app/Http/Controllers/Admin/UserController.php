@@ -28,7 +28,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone_number' => 'nullable|string|max:20|unique:users,phone_number',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|confirmed',
             'role' => 'required|in:user,admin',
             'address' => 'nullable|string',
         ]);
@@ -73,7 +73,7 @@ class UserController extends Controller
             'phone_number' => ['nullable', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
             'role' => 'required|in:user,admin',
             'address' => 'nullable|string',
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|confirmed',
         ]);
 
         try {
