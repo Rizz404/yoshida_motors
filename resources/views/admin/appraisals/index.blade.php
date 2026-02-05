@@ -110,7 +110,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
                                 @if ($request->final_price)
                                     <span class="font-mono font-medium">
-                                        Rp {{ number_format($request->final_price, 0, ',', '.') }}
+                                        $ {{ number_format($request->final_price, 2, '.', ',') }}
                                     </span>
                                 @else
                                     <span class="text-neutral-400 italic">Pending</span>

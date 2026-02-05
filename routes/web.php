@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AppraisalRequestController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
@@ -23,7 +24,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('appraisals', AppraisalRequestController::class);
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard'); // Nanti kita buat file ini
-    })->name('dashboard');
+    // * Karena pake invoke jadi gak usah pake array padahal bukan resource
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
 });
