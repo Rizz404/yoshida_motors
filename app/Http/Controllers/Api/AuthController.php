@@ -4,65 +4,106 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use Kreait\Firebase\Exception\Auth\FailedToVerifyToken;
-use Kreait\Laravel\Firebase\Facades\Firebase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Auth as FirebaseAuth;
 
 class AuthController extends Controller
 {
+    use ApiResponseTrait;
+
+    protected $firebaseAuth;
+
+    public function __construct()
+    {
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+        $this->firebaseAuth = $factory->createAuth();
+    }
+
+    /**
+     * Register or Login with Firebase UID
+     */
     public function loginWithFirebase(Request $request)
     {
-        // 1. Validasi Input dari Flutter
-        $request->validate([
-            'phone_number' => 'required|string', // Format +62...
-            'firebase_id_token' => 'required|string', // Token panjang dari Flutter
+        $validator = Validator::make($request->all(), [
+            'firebase_uid' => 'required|string',
+            'phone_number' => 'required|string',
+            'fcm_token' => 'nullable|string',
         ]);
 
-        $auth = Firebase::auth();
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
 
         try {
-            // 2. Verifikasi Token ke Server Firebase
-            // Ini mastiin tokennya asli dari Firebase, bukan token palsu buatan hacker
-            $verifiedIdToken = $auth->verifyIdToken($request->firebase_id_token);
-            $uid = $verifiedIdToken->claims()->get('sub');
-            $firebasePhone = $verifiedIdToken->claims()->get('phone_number');
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->firebase_uid);
 
-            // Cek apakah nomor HP match (Double check security)
-            if ($firebasePhone !== $request->phone_number) {
-                return response()->json(['message' => 'Phone number mismatch'], 401);
-            }
-
-            // 3. Cari User atau Buat Baru (First or Create)
-            $user = User::firstOrCreate(
-                ['phone_number' => $request->phone_number], // Cari berdasarkan no hp
+            $user = User::updateOrCreate(
+                ['firebase_uid' => $request->firebase_uid],
                 [
-                    'name' => 'User ' . substr($request->phone_number, -4), // Default name
+                    'phone_number' => $request->phone_number,
+                    'fcm_token' => $request->fcm_token,
                     'role' => 'user',
-                    'firebase_uid' => $uid,
                 ]
             );
 
-            // Update UID kalau user lama tapi UID baru (misal install ulang)
-            if ($user->firebase_uid !== $uid) {
-                $user->update(['firebase_uid' => $uid]);
-            }
+            $token = $user->createToken('mobile-app-token')->plainTextToken;
 
-            // 4. Terbitkan Token Sanctum (Karcis Masuk)
-            // Hapus token lama biar bersih (opsional, biar 1 device 1 token aktif)
-            // $user->tokens()->delete();
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            return response()->json([
-                'message' => 'Login success',
-                'access_token' => $token,
-                'token_type' => 'Bearer',
+            return $this->successResponse([
                 'user' => $user,
-            ]);
-        } catch (FailedToVerifyToken $e) {
-            return response()->json(['message' => 'Invalid Firebase Token: ' . $e->getMessage()], 401);
+                'token' => $token,
+            ], 'Login successful');
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Server Error: ' . $e->getMessage()], 500);
+            return $this->errorResponse('Firebase authentication failed: ' . $e->getMessage(), null, 401);
         }
+    }
+
+    /**
+     * Update User Profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $request->user()->id,
+            'address' => 'nullable|string',
+            'fcm_token' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
+
+        $user = $request->user();
+        $user->update($request->only(['name', 'email', 'address', 'fcm_token']));
+
+        return $this->successResponse($user, 'Profile updated successfully');
+    }
+
+    /**
+     * Get Current User Profile
+     */
+    public function profile(Request $request)
+    {
+        return $this->successResponse($request->user(), 'Profile retrieved successfully');
+    }
+
+    /**
+     * Logout
+     *
+     * Revoke the current access token used for the request.
+     * This is the correct way to logout in Sanctum API authentication.
+     */
+    public function logout(Request $request)
+    {
+        // Revoke current access token - this is the correct Sanctum way
+        /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+        $token = $request->user()->currentAccessToken();
+        $token->delete();
+
+        return $this->successResponse(null, 'Logout successful');
     }
 }
