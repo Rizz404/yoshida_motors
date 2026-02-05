@@ -1,9 +1,9 @@
 <aside class="flex flex-col w-64 h-full bg-primary-900 text-white transition-all duration-300">
     <!-- Logo Section -->
     <div class="flex items-center justify-center h-16 bg-primary-950 border-b border-primary-800 shrink-0">
-        <h1 class="text-xl font-bold tracking-wider uppercase">
+        <a href="{{ route('dashboard') }}" class="text-xl font-bold tracking-wider uppercase">
             Yoshida<span class="text-primary-400">Motors</span>
-        </h1>
+        </a>
     </div>
 
     <!-- Navigation Links -->
@@ -19,12 +19,12 @@
                     'active' => request()->routeIs('dashboard'),
                     'icon' => 'home', // Uses heroicon-o-home
                 ],
-                [
-                    'label' => 'Vehicle Listings',
-                    'route' => '#',
-                    'active' => false,
-                    'icon' => 'truck', // Uses heroicon-o-truck
-                ],
+                // [
+                //     'label' => 'Vehicle Listings',
+                //     'route' => '#',
+                //     'active' => false,
+                //     'icon' => 'truck', // Uses heroicon-o-truck
+                // ],
                 [
                     'label' => 'Appraisals',
                     'route' => route('appraisals.index'),
