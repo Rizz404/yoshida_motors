@@ -1,4 +1,4 @@
-<x-layouts.main title="Admin Login - Car Rongsok">
+<x-layouts.main title="Admin Login - Yoshida Motors">
 
     <div class="min-h-screen flex items-center justify-center bg-neutral-100">
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 border border-neutral-200">
