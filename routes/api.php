@@ -8,8 +8,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->name('api.v1.')->group(function () {
 
     // Public routes
-    Route::post('/auth/firebase', [AuthController::class, 'loginWithFirebase'])
-        ->name('auth.firebase');
+    Route::post('/auth/register', [AuthController::class, 'registerWithFirebase'])
+        ->name('auth.register');
+    Route::post('/auth/login', [AuthController::class, 'loginWithFirebase'])
+        ->name('auth.login');
 
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {

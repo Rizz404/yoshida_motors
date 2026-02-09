@@ -52,4 +52,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get all appraisal requests for this user
+     */
+    public function appraisalRequests()
+    {
+        return $this->hasMany(AppraisalRequest::class);
+    }
 }

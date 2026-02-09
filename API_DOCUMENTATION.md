@@ -1,0 +1,1083 @@
+# API Documentation - Car Rongsok
+
+Dokumentasi lengkap untuk integrasi frontend dengan backend API.
+
+## Base URL
+```
+http://your-domain.com/api/v1
+```
+
+## Headers
+Semua request yang memerlukan autentikasi harus menyertakan header:
+```
+Authorization: Bearer {token}
+Accept: application/json
+Content-Type: application/json
+```
+
+---
+
+## 📱 Authentication Endpoints
+
+### 1. Register with Firebase
+**Endpoint:** `POST /auth/register`
+**Auth Required:** No
+
+**Request Body:**
+```json
+{
+  "firebase_uid": "string (required)",
+  "phone_number": "string (required, unique)",
+  "name": "string (optional, max:255)",
+  "email": "string|email (optional, unique)",
+  "address": "string (optional)",
+  "fcm_token": "string (optional)"
+}
+```
+
+**Example:**
+```json
+{
+  "firebase_uid": "abc123xyz",
+  "phone_number": "+628123456789",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "address": "Jakarta Selatan",
+  "fcm_token": "fcm_device_token_here"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "user": {
+      "id": 1,
+      "firebase_uid": "abc123xyz",
+      "phone_number": "+628123456789",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "address": "Jakarta Selatan",
+      "role": "user",
+      "fcm_token": "fcm_device_token_here",
+      "created_at": "2026-02-09T10:00:00.000000Z",
+      "updated_at": "2026-02-09T10:00:00.000000Z"
+    },
+    "token": "1|abc123tokenxyz..."
+  }
+}
+```
+
+**Error Response (409) - User Already Exists:**
+```json
+{
+  "success": false,
+  "message": "User already registered. Please login instead.",
+  "errors": null
+}
+```
+
+**Error Response (401) - Firebase Verification Failed:**
+```json
+{
+  "success": false,
+  "message": "Firebase authentication failed: Invalid token",
+  "errors": null
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "firebase_uid": ["The firebase uid field is required."],
+    "phone_number": ["The phone number field is required.", "The phone number has already been taken."],
+    "email": ["The email has already been taken."]
+  }
+}
+```
+
+---
+
+### 2. Login with Firebase
+**Endpoint:** `POST /auth/login`
+**Auth Required:** No
+
+**Request Body:**
+```json
+{
+  "firebase_uid": "string (required)",
+  "fcm_token": "string (optional)"
+}
+```
+
+**Example:**
+```json
+{
+  "firebase_uid": "abc123xyz",
+  "fcm_token": "new_fcm_token_if_device_changed"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 1,
+      "firebase_uid": "abc123xyz",
+      "phone_number": "+628123456789",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "address": "Jakarta Selatan",
+      "role": "user",
+      "fcm_token": "new_fcm_token_if_device_changed",
+      "created_at": "2026-02-09T10:00:00.000000Z",
+      "updated_at": "2026-02-09T10:30:00.000000Z"
+    },
+    "token": "1|new_access_token_xyz..."
+  }
+}
+```
+
+**Error Response (404) - User Not Found:**
+```json
+{
+  "success": false,
+  "message": "User not found. Please register first.",
+  "errors": null
+}
+```
+
+**Error Response (401) - Firebase Verification Failed:**
+```json
+{
+  "success": false,
+  "message": "Firebase authentication failed: Invalid token",
+  "errors": null
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "firebase_uid": ["The firebase uid field is required."]
+  }
+}
+```
+
+---
+
+### 3. Get User Profile
+**Endpoint:** `GET /auth/profile`
+**Auth Required:** Yes
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Profile retrieved successfully",
+  "data": {
+    "id": 1,
+    "firebase_uid": "abc123xyz",
+    "phone_number": "+628123456789",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "address": "Jakarta",
+    "role": "user",
+    "fcm_token": "fcm_token_here",
+    "created_at": "2026-01-20T10:00:00.000000Z",
+    "updated_at": "2026-01-20T10:00:00.000000Z"
+  }
+}
+```
+
+**Unauthorized Response (401):**
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "errors": null
+}
+```
+
+---
+
+### 4. Update User Profile
+**Endpoint:** `PUT /auth/profile`
+**Auth Required:** Yes
+
+**Request Body:**
+```json
+{
+  "name": "string (optional)",
+  "email": "string|email (optional)",
+  "address": "string (optional)",
+  "fcm_token": "string (optional)"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "id": 1,
+    "firebase_uid": "abc123xyz",
+    "phone_number": "+628123456789",
+    "name": "John Doe Updated",
+    "email": "newemail@example.com",
+    "address": "Bandung",
+    "role": "user",
+    "fcm_token": "new_fcm_token",
+    "created_at": "2026-01-20T10:00:00.000000Z",
+    "updated_at": "2026-02-09T12:00:00.000000Z"
+  }
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "email": ["The email has already been taken."]
+  }
+}
+```
+
+---
+
+### 5. Logout
+**Endpoint:** `POST /auth/logout`
+**Auth Required:** Yes
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Logout successful",
+  "data": null
+}
+```
+
+---
+
+## 🚗 Appraisal Request Endpoints
+
+### 1. Get All Appraisal Requests (with Pagination, Search, Filter, Sort)
+**Endpoint:** `GET /appraisals`
+**Auth Required:** Yes
+
+**Query Parameters:**
+```
+search          : string (optional) - Search in brand, model, or description
+status          : string (optional) - Filter by status: draft|submitted|under_review|completed|rejected
+year_min        : integer (optional) - Minimum year manufacture
+year_max        : integer (optional) - Maximum year manufacture
+sort_by         : string (optional) - Sort field: created_at|updated_at|year_manufacture|vehicle_brand|final_price (default: created_at)
+sort_dir        : string (optional) - Sort direction: asc|desc (default: desc)
+per_page        : integer (optional) - Items per page (default: 10)
+cursor          : string (optional) - Cursor for pagination
+```
+
+**Example Request:**
+```
+GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture&sort_dir=desc&per_page=15
+```
+
+**Success Response (200) - Cursor Pagination:**
+```json
+{
+  "success": true,
+  "message": "Appraisal requests retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "vehicle_brand": "Toyota",
+      "vehicle_model": "Avanza",
+      "year_manufacture": 2020,
+      "description": "Mobil terawat, service rutin",
+      "status": "draft",
+      "final_price": null,
+      "admin_notes": null,
+      "created_at": "2026-02-01T10:00:00.000000Z",
+      "updated_at": "2026-02-01T10:00:00.000000Z",
+      "photos": [
+        {
+          "id": 1,
+          "appraisal_request_id": 1,
+          "category_name": "Tampak Depan",
+          "image_path": "appraisal_photos/1/photo1.jpg",
+          "created_at": "2026-02-01T11:00:00.000000Z",
+          "updated_at": "2026-02-01T11:00:00.000000Z"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "per_page": 15,
+    "next_cursor": "eyJpZCI6MTUsIl9wb2ludHNUb05leHRJdGVtcyI6dHJ1ZX0",
+    "prev_cursor": null,
+    "has_more": true
+  }
+}
+```
+
+**Notes untuk Frontend:**
+- Gunakan `next_cursor` untuk load more data berikutnya
+- Kirim `cursor` parameter dengan value dari `next_cursor` untuk infinite scroll
+- `has_more: true` berarti masih ada data selanjutnya
+- `prev_cursor` bisa digunakan untuk navigasi mundur (opsional)
+
+---
+
+### 2. Create New Appraisal Request
+**Endpoint:** `POST /appraisals`
+**Auth Required:** Yes
+
+**Request Body:**
+```json
+{
+  "vehicle_brand": "string (required, max:255)",
+  "vehicle_model": "string (required, max:255)",
+  "year_manufacture": "integer (required, min:1900, max:2027)",
+  "description": "string (optional)"
+}
+```
+
+**Example:**
+```json
+{
+  "vehicle_brand": "Honda",
+  "vehicle_model": "Jazz RS",
+  "year_manufacture": 2022,
+  "description": "Mobil masih sangat terawat, kilometer rendah"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "success": true,
+  "message": "Appraisal request created successfully",
+  "data": {
+    "id": 5,
+    "user_id": 1,
+    "vehicle_brand": "Honda",
+    "vehicle_model": "Jazz RS",
+    "year_manufacture": 2022,
+    "description": "Mobil masih sangat terawat, kilometer rendah",
+    "status": "draft",
+    "final_price": null,
+    "admin_notes": null,
+    "created_at": "2026-02-09T15:00:00.000000Z",
+    "updated_at": "2026-02-09T15:00:00.000000Z"
+  }
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "vehicle_brand": ["The vehicle brand field is required."],
+    "year_manufacture": ["The year manufacture must be at least 1900."]
+  }
+}
+```
+
+---
+
+### 3. Get Single Appraisal Request
+**Endpoint:** `GET /appraisals/{id}`
+**Auth Required:** Yes
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Appraisal request retrieved successfully",
+  "data": {
+    "id": 1,
+    "user_id": 1,
+    "vehicle_brand": "Toyota",
+    "vehicle_model": "Avanza",
+    "year_manufacture": 2020,
+    "description": "Mobil terawat",
+    "status": "draft",
+    "final_price": null,
+    "admin_notes": null,
+    "created_at": "2026-02-01T10:00:00.000000Z",
+    "updated_at": "2026-02-01T10:00:00.000000Z",
+    "photos": [
+      {
+        "id": 1,
+        "appraisal_request_id": 1,
+        "category_name": "Tampak Depan",
+        "image_path": "appraisal_photos/1/photo1.jpg",
+        "created_at": "2026-02-01T11:00:00.000000Z",
+        "updated_at": "2026-02-01T11:00:00.000000Z"
+      },
+      {
+        "id": 2,
+        "appraisal_request_id": 1,
+        "category_name": "Tampak Belakang",
+        "image_path": "appraisal_photos/1/photo2.jpg",
+        "created_at": "2026-02-01T11:05:00.000000Z",
+        "updated_at": "2026-02-01T11:05:00.000000Z"
+      }
+    ]
+  }
+}
+```
+
+**Not Found Response (404):**
+```json
+{
+  "success": false,
+  "message": "Appraisal request not found",
+  "errors": null
+}
+```
+
+---
+
+### 4. Update Appraisal Request
+**Endpoint:** `PUT /appraisals/{id}`
+**Auth Required:** Yes
+
+**⚠️ Important:** Hanya bisa update appraisal dengan status `draft`
+
+**Request Body:**
+```json
+{
+  "vehicle_brand": "string (optional, max:255)",
+  "vehicle_model": "string (optional, max:255)",
+  "year_manufacture": "integer (optional, min:1900, max:2027)",
+  "description": "string (optional)"
+}
+```
+
+**Example:**
+```json
+{
+  "vehicle_model": "Jazz RS CVT",
+  "description": "Updated description with more details"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Appraisal request updated successfully",
+  "data": {
+    "id": 5,
+    "user_id": 1,
+    "vehicle_brand": "Honda",
+    "vehicle_model": "Jazz RS CVT",
+    "year_manufacture": 2022,
+    "description": "Updated description with more details",
+    "status": "draft",
+    "final_price": null,
+    "admin_notes": null,
+    "created_at": "2026-02-09T15:00:00.000000Z",
+    "updated_at": "2026-02-09T15:30:00.000000Z"
+  }
+}
+```
+
+**Error Response (403) - Already Submitted:**
+```json
+{
+  "success": false,
+  "message": "Cannot update submitted appraisal request",
+  "errors": null
+}
+```
+
+**Not Found Response (404):**
+```json
+{
+  "success": false,
+  "message": "Appraisal request not found",
+  "errors": null
+}
+```
+
+---
+
+### 5. Upload Photo to Appraisal
+**Endpoint:** `POST /appraisals/{id}/photos`
+**Auth Required:** Yes
+**Content-Type:** `multipart/form-data`
+
+**⚠️ Important:** Hanya bisa upload foto ke appraisal dengan status `draft`
+
+**Request Body (Form Data):**
+```
+category_name   : string (required, max:255) - e.g., "Tampak Depan", "Tampak Belakang", "Interior", "Dashboard"
+image           : file (required, image: jpeg|png|jpg, max: 5MB)
+```
+
+**Example:**
+```javascript
+const formData = new FormData();
+formData.append('category_name', 'Tampak Depan');
+formData.append('image', fileObject);
+```
+
+**Success Response (201):**
+```json
+{
+  "success": true,
+  "message": "Photo uploaded successfully",
+  "data": {
+    "id": 10,
+    "appraisal_request_id": 5,
+    "category_name": "Tampak Depan",
+    "image_path": "appraisal_photos/5/xyz123.jpg",
+    "created_at": "2026-02-09T16:00:00.000000Z",
+    "updated_at": "2026-02-09T16:00:00.000000Z"
+  }
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "image": ["The image must be a file of type: jpeg, png, jpg."],
+    "category_name": ["The category name field is required."]
+  }
+}
+```
+
+**Error Response (403) - Already Submitted:**
+```json
+{
+  "success": false,
+  "message": "Cannot upload photos to submitted appraisal",
+  "errors": null
+}
+```
+
+---
+
+### 6. Delete Photo from Appraisal
+**Endpoint:** `DELETE /appraisals/{appraisalId}/photos/{photoId}`
+**Auth Required:** Yes
+
+**⚠️ Important:** Hanya bisa delete foto dari appraisal dengan status `draft`
+
+**Request:** No body required
+
+**Example:**
+```
+DELETE /appraisals/5/photos/10
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Photo deleted successfully",
+  "data": null
+}
+```
+
+**Not Found Response (404) - Photo:**
+```json
+{
+  "success": false,
+  "message": "Photo not found",
+  "errors": null
+}
+```
+
+**Not Found Response (404) - Appraisal:**
+```json
+{
+  "success": false,
+  "message": "Appraisal request not found",
+  "errors": null
+}
+```
+
+**Error Response (403) - Already Submitted:**
+```json
+{
+  "success": false,
+  "message": "Cannot delete photos from submitted appraisal",
+  "errors": null
+}
+```
+
+---
+
+### 7. Submit Appraisal for Review
+**Endpoint:** `POST /appraisals/{id}/submit`
+**Auth Required:** Yes
+
+**⚠️ Important:**
+- Hanya bisa submit appraisal dengan status `draft`
+- Minimal harus ada 1 foto sebelum submit
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Appraisal submitted successfully",
+  "data": {
+    "id": 5,
+    "user_id": 1,
+    "vehicle_brand": "Honda",
+    "vehicle_model": "Jazz RS CVT",
+    "year_manufacture": 2022,
+    "description": "Mobil terawat",
+    "status": "submitted",
+    "final_price": null,
+    "admin_notes": null,
+    "created_at": "2026-02-09T15:00:00.000000Z",
+    "updated_at": "2026-02-09T17:00:00.000000Z",
+    "photos": [
+      {
+        "id": 10,
+        "appraisal_request_id": 5,
+        "category_name": "Tampak Depan",
+        "image_path": "appraisal_photos/5/xyz123.jpg",
+        "created_at": "2026-02-09T16:00:00.000000Z",
+        "updated_at": "2026-02-09T16:00:00.000000Z"
+      }
+    ]
+  }
+}
+```
+
+**Error Response (400) - No Photos:**
+```json
+{
+  "success": false,
+  "message": "Please upload at least one photo before submitting",
+  "errors": null
+}
+```
+
+**Error Response (400) - Already Submitted:**
+```json
+{
+  "success": false,
+  "message": "Appraisal already submitted",
+  "errors": null
+}
+```
+
+**Not Found Response (404):**
+```json
+{
+  "success": false,
+  "message": "Appraisal request not found",
+  "errors": null
+}
+```
+
+---
+
+### 8. Delete Appraisal Request
+**Endpoint:** `DELETE /appraisals/{id}`
+**Auth Required:** Yes
+
+**⚠️ Important:** Hanya bisa delete appraisal dengan status `draft`
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Appraisal request deleted successfully",
+  "data": null
+}
+```
+
+**Error Response (403) - Already Submitted:**
+```json
+{
+  "success": false,
+  "message": "Cannot delete submitted appraisal request",
+  "errors": null
+}
+```
+
+**Not Found Response (404):**
+```json
+{
+  "success": false,
+  "message": "Appraisal request not found",
+  "errors": null
+}
+```
+
+---
+
+## 📋 Standard Response Format
+
+Semua response mengikuti format standar dari `ApiResponseTrait`:
+
+### Success Response
+```json
+{
+  "success": true,
+  "message": "Success message here",
+  "data": {} // or [] or null
+}
+```
+
+### Error Response
+```json
+{
+  "success": false,
+  "message": "Error message here",
+  "errors": {} // or null
+}
+```
+
+### Cursor Paginated Response
+```json
+{
+  "success": true,
+  "message": "Success message",
+  "data": [], // Array of items
+  "meta": {
+    "per_page": 10,
+    "next_cursor": "encoded_cursor_string",
+    "prev_cursor": null,
+    "has_more": true
+  }
+}
+```
+
+---
+
+## 🔐 Authentication Flow
+
+### First Time User (Register)
+1. User melakukan autentikasi via Firebase di aplikasi mobile (Firebase Phone Auth/Social Login)
+2. Dapatkan `firebase_uid` dari Firebase SDK
+3. Kirim `firebase_uid`, `phone_number`, dan data profil lainnya ke endpoint `POST /auth/register`
+4. Backend akan verify token dengan Firebase SDK
+5. Backend return `user` data dan `token` (Sanctum token)
+6. Simpan `token` di secure storage (AsyncStorage/SecureStore)
+7. Navigasi ke halaman utama aplikasi
+
+### Returning User (Login)
+1. User melakukan autentikasi via Firebase di aplikasi mobile
+2. Dapatkan `firebase_uid` dari Firebase SDK
+3. Kirim `firebase_uid` (dan optional `fcm_token` jika device berubah) ke endpoint `POST /auth/login`
+4. Backend akan verify token dan cari user berdasarkan `firebase_uid`
+5. Backend return `user` data dan `token` baru
+6. Update `token` di secure storage
+7. Navigasi ke halaman utama aplikasi
+
+### Authenticated Requests
+- Untuk semua request berikutnya, kirim token di header: `Authorization: Bearer {token}`
+- Token Sanctum bersifat stateless, tidak perlu refresh token
+- Token berlaku sampai user logout atau dihapus manual
+
+### Logout
+- Panggil endpoint `POST /auth/logout` untuk revoke current token
+- Hapus token dari local storage
+- Navigasi kembali ke halaman login
+
+### Error Handling
+- `404 - User not found`: Redirect ke register page
+- `409 - User already exists`: Redirect ke login page
+- `401 - Unauthorized`: Token invalid/expired, hapus token dan redirect ke login
+
+---
+
+## 🎯 Status Appraisal
+
+| Status         | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| `draft`        | Baru dibuat, masih bisa edit & hapus                 |
+| `submitted`    | Sudah disubmit, menunggu review admin                |
+| `under_review` | Sedang direview oleh admin                           |
+| `completed`    | Sudah selesai, ada `final_price` dan `admin_notes`   |
+| `rejected`     | Ditolak oleh admin, lihat `admin_notes` untuk alasan |
+
+---
+
+## 💡 Tips untuk Frontend Developer
+
+### Authentication with Firebase
+
+#### Register Flow
+```javascript
+import { auth } from './firebase-config';
+import { signInWithPhoneNumber } from 'firebase/auth';
+import api from './api-service';
+
+const registerUser = async (phoneNumber, userData) => {
+  try {
+    // 1. Verify phone with Firebase
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+    const result = await confirmationResult.confirm(verificationCode);
+
+    // 2. Get Firebase UID
+    const firebaseUid = result.user.uid;
+
+    // 3. Register to backend
+    const response = await api.post('/auth/register', {
+      firebase_uid: firebaseUid,
+      phone_number: phoneNumber,
+      name: userData.name,
+      email: userData.email,
+      address: userData.address,
+      fcm_token: await getFCMToken(), // Get from Firebase Messaging
+    });
+
+    if (response.data.success) {
+      const { user, token } = response.data.data;
+
+      // 4. Save token to secure storage
+      await SecureStore.setItemAsync('auth_token', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(user));
+
+      // 5. Navigate to home
+      navigation.navigate('Home');
+    }
+  } catch (error) {
+    if (error.response?.status === 409) {
+      // User already exists, redirect to login
+      console.log('User already registered, please login');
+    } else {
+      console.error('Registration failed:', error.response?.data?.message);
+    }
+  }
+};
+```
+
+#### Login Flow
+```javascript
+const loginUser = async (phoneNumber) => {
+  try {
+    // 1. Verify phone with Firebase
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+    const result = await confirmationResult.confirm(verificationCode);
+
+    // 2. Get Firebase UID
+    const firebaseUid = result.user.uid;
+
+    // 3. Login to backend
+    const response = await api.post('/auth/login', {
+      firebase_uid: firebaseUid,
+      fcm_token: await getFCMToken(),
+    });
+
+    if (response.data.success) {
+      const { user, token } = response.data.data;
+
+      // 4. Save token to secure storage
+      await SecureStore.setItemAsync('auth_token', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(user));
+
+      // 5. Navigate to home
+      navigation.navigate('Home');
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      // User not found, redirect to register
+      console.log('User not found, please register first');
+      navigation.navigate('Register');
+    } else {
+      console.error('Login failed:', error.response?.data?.message);
+    }
+  }
+};
+```
+
+#### Logout
+```javascript
+const logoutUser = async () => {
+  try {
+    // 1. Call backend logout to revoke token
+    await api.post('/auth/logout');
+
+    // 2. Sign out from Firebase
+    await auth.signOut();
+
+    // 3. Clear local storage
+    await SecureStore.deleteItemAsync('auth_token');
+    await SecureStore.deleteItemAsync('user_data');
+
+    // 4. Navigate to login
+    navigation.navigate('Login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
+```
+
+#### Setup API Interceptor
+```javascript
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+
+const api = axios.create({
+  baseURL: 'http://your-api.com/api/v1',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor - attach token
+api.interceptors.request.use(
+  async (config) => {
+    const token = await SecureStore.getItemAsync('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor - handle 401
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Token invalid/expired, clear and redirect to login
+      await SecureStore.deleteItemAsync('auth_token');
+      await SecureStore.deleteItemAsync('user_data');
+      // Navigate to login page
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
+```
+
+---
+
+### Infinite Scroll Implementation
+```javascript
+const loadMore = async (cursor = null) => {
+  const url = cursor
+    ? `/appraisals?cursor=${cursor}`
+    : '/appraisals';
+
+  const response = await api.get(url);
+
+  if (response.data.success) {
+    const newItems = response.data.data;
+    const nextCursor = response.data.meta.next_cursor;
+    const hasMore = response.data.meta.has_more;
+
+    // Append newItems to your list
+    // Save nextCursor for next load
+    // Update hasMore state
+  }
+};
+```
+
+### Image Upload
+```javascript
+const uploadPhoto = async (appraisalId, categoryName, imageFile) => {
+  const formData = new FormData();
+  formData.append('category_name', categoryName);
+  formData.append('image', imageFile);
+
+  const response = await api.post(
+    `/appraisals/${appraisalId}/photos`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+
+  return response.data;
+};
+```
+
+### Display Image
+Image path yang dikembalikan adalah relative path. Untuk menampilkan:
+```javascript
+const imageUrl = `${BASE_URL}/storage/${photo.image_path}`;
+```
+
+### Error Handling
+```javascript
+try {
+  const response = await api.post('/appraisals', data);
+  // Handle success
+} catch (error) {
+  if (error.response) {
+    if (error.response.status === 422) {
+      // Validation errors
+      const errors = error.response.data.errors;
+      // Display validation errors
+    } else if (error.response.status === 401) {
+      // Unauthorized - redirect to login
+    } else if (error.response.status === 403) {
+      // Forbidden - show error message
+    } else if (error.response.status === 404) {
+      // Not found
+    }
+  }
+}
+```
+
+---
+
+## 📝 Notes
+
+- Semua timestamp menggunakan format ISO 8601 dengan timezone UTC
+- File upload maksimal 5MB per foto
+- Format gambar yang diterima: JPEG, PNG, JPG
+- Cursor pagination lebih efisien untuk infinite scroll dibanding offset pagination
+- Token Sanctum bersifat stateless, tidak perlu refresh token
+- Untuk testing, bisa menggunakan Postman/Insomnia dengan collection yang sesuai
+
+---
+
+## 🚀 Getting Started
+
+1. Set base URL API di konfigurasi aplikasi
+2. Implementasi Firebase Authentication
+3. Store & manage Sanctum token
+4. Setup axios/fetch interceptor untuk attach token
+5. Implement error handling globally
+6. Test semua endpoint sesuai dokumentasi ini
+
+Happy coding! 🎉
