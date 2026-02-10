@@ -17,28 +17,79 @@ Content-Type: application/json
 
 ---
 
+## � Firebase Authentication - Penjelasan Penting
+
+### User Experience Flow
+1. ✅ User **hanya input nomor telepon** (+628xxx)
+2. ✅ Firebase **otomatis kirim OTP** via SMS
+3. ✅ User **input kode OTP** (6 digit)
+4. ✅ Selesai! User berhasil login/register
+
+### Technical Flow (Behind the Scenes)
+**Yang User Lihat:**
+- Input nomor telepon → Input OTP → Done!
+
+**Yang Terjadi di Backend:**
+1. Frontend: `signInWithPhoneNumber()` → Firebase kirim OTP
+2. Frontend: `confirmationResult.confirm(otp)` → Firebase verify OTP
+3. Frontend: `result.user.getIdToken()` → **Dapat ID Token**
+4. Frontend → Backend: Kirim **ID Token** + data
+5. Backend: Verify **ID Token** → Extract **Firebase UID** → Register/Login
+
+### ⚠️ Penting: ID Token vs Firebase UID
+
+| Istilah          | Apa Itu?                                             | Kapan Dipakai?                                           |
+| ---------------- | ---------------------------------------------------- | -------------------------------------------------------- |
+| **ID Token**     | JWT token panjang dari Firebase setelah OTP berhasil | Dikirim dari **Frontend → Backend** untuk verifikasi     |
+| **Firebase UID** | User ID unik dari Firebase (contoh: `abc123xyz`)     | Disimpan di **database backend** untuk identifikasi user |
+
+**Request ke Backend:**
+```json
+{
+  "id_token": "eyJhbGciOiJSUzI1Ni...", // ← Ini yang dikirim (JWT panjang)
+  "phone_number": "+628123456789"
+}
+```
+
+**Backend Extract UID dari ID Token:**
+```php
+$verifiedToken = $firebaseAuth->verifyIdToken($request->id_token);
+$firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
+// Simpan $firebaseUid ke database
+```
+
+---
+
 ## 📱 Authentication Endpoints
 
 ### 1. Register with Firebase
 **Endpoint:** `POST /auth/register`
 **Auth Required:** No
 
+**Flow yang Terjadi:**
+1. ✅ User input **nomor telepon** di app
+2. ✅ Firebase kirim **OTP** ke nomor telepon
+3. ✅ User input **kode OTP**
+4. ✅ Firebase verify OTP → dapat **ID Token**
+5. ✅ Frontend kirim **ID Token** + data ke endpoint ini
+6. ✅ Backend verify ID Token → register user
+
 **Request Body:**
 ```json
 {
-  "firebase_uid": "string (required)",
-  "phone_number": "string (required, unique)",
+  "id_token": "string (required) - ID Token dari Firebase setelah OTP berhasil",
+  "phone_number": "string (required, unique) - Nomor telepon format E.164 (+628xxx)",
   "name": "string (optional, max:255)",
   "email": "string|email (optional, unique)",
   "address": "string (optional)",
-  "fcm_token": "string (optional)"
+  "fcm_token": "string (optional) - Firebase Cloud Messaging token untuk push notif"
 }
 ```
 
 **Example:**
 ```json
 {
-  "firebase_uid": "abc123xyz",
+  "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOWdkazcifQ.ewogImlzcyI6ICJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20v...",
   "phone_number": "+628123456789",
   "name": "John Doe",
   "email": "john@example.com",
@@ -94,7 +145,7 @@ Content-Type: application/json
   "success": false,
   "message": "Validation failed",
   "errors": {
-    "firebase_uid": ["The firebase uid field is required."],
+    "id_token": ["The id token field is required."],
     "phone_number": ["The phone number field is required.", "The phone number has already been taken."],
     "email": ["The email has already been taken."]
   }
@@ -107,24 +158,26 @@ Content-Type: application/json
 **Endpoint:** `POST /auth/login`
 **Auth Required:** No
 
+**Flow yang Terjadi:**
+1. ✅ User input **nomor telepon** di app (sama seperti register)
+2. ✅ Firebase kirim **OTP** ke nomor telepon
+3. ✅ User input **kode OTP**
+4. ✅ Firebase verify OTP → dapat **ID Token**
+5. ✅ Frontend kirim **ID Token** ke endpoint ini
+6. ✅ Backend verify ID Token → login user
+
 **Request Body:**
 ```json
 {
-  "firebase_uid": "string (required)",
-  "fcm_token": "string (optional)"
+  "id_token": "string (required) - ID Token dari Firebase setelah OTP berhasil",
+  "fcm_token": "string (optional) - Update FCM token jika device berubah"
 }
 ```
 
 **Example:**
 ```json
 {
-  "firebase_uid": "abc123xyz",
-  "fcm_token": "new_fcm_token_if_device_changed"
-}
-```
-
-**Success Response (200):**
-```json
+  "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOWdkazcifQ.ewogImlzcyI6ICJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20v...",
 {
   "success": true,
   "message": "Login successful",
@@ -170,7 +223,7 @@ Content-Type: application/json
   "success": false,
   "message": "Validation failed",
   "errors": {
-    "firebase_uid": ["The firebase uid field is required."]
+    "id_token": ["The id token field is required."]
   }
 }
 ```
@@ -787,22 +840,26 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 ## 🔐 Authentication Flow
 
 ### First Time User (Register)
-1. User melakukan autentikasi via Firebase di aplikasi mobile (Firebase Phone Auth/Social Login)
-2. Dapatkan `firebase_uid` dari Firebase SDK
-3. Kirim `firebase_uid`, `phone_number`, dan data profil lainnya ke endpoint `POST /auth/register`
-4. Backend akan verify token dengan Firebase SDK
-5. Backend return `user` data dan `token` (Sanctum token)
-6. Simpan `token` di secure storage (AsyncStorage/SecureStore)
-7. Navigasi ke halaman utama aplikasi
+1. User input **nomor telepon** di aplikasi mobile
+2. Firebase kirim **OTP** ke nomor telepon
+3. User input **kode OTP**
+4. Firebase verify OTP → dapat **ID Token**
+5. Frontend kirim **ID Token** + data profil ke endpoint `POST /auth/register`
+6. Backend verify ID Token dengan Firebase SDK → extract Firebase UID
+7. Backend create user dan return `token` (Sanctum token)
+8. Simpan `token` di secure storage (AsyncStorage/SecureStore)
+9. Navigasi ke halaman utama aplikasi
 
 ### Returning User (Login)
-1. User melakukan autentikasi via Firebase di aplikasi mobile
-2. Dapatkan `firebase_uid` dari Firebase SDK
-3. Kirim `firebase_uid` (dan optional `fcm_token` jika device berubah) ke endpoint `POST /auth/login`
-4. Backend akan verify token dan cari user berdasarkan `firebase_uid`
-5. Backend return `user` data dan `token` baru
-6. Update `token` di secure storage
-7. Navigasi ke halaman utama aplikasi
+1. User input **nomor telepon** di aplikasi mobile (sama seperti register)
+2. Firebase kirim **OTP** ke nomor telepon
+3. User input **kode OTP**
+4. Firebase verify OTP → dapat **ID Token**
+5. Frontend kirim **ID Token** ke endpoint `POST /auth/login`
+6. Backend verify ID Token → cari user berdasarkan Firebase UID
+7. Backend return `user` data dan `token` baru
+8. Update `token` di secure storage
+9. Navigasi ke halaman utama aplikasi
 
 ### Authenticated Requests
 - Untuk semua request berikutnya, kirim token di header: `Authorization: Bearer {token}`
@@ -845,16 +902,18 @@ import api from './api-service';
 
 const registerUser = async (phoneNumber, userData) => {
   try {
-    // 1. Verify phone with Firebase
+    // 1. Kirim OTP ke nomor telepon via Firebase
     const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+
+    // 2. User input kode OTP
     const result = await confirmationResult.confirm(verificationCode);
 
-    // 2. Get Firebase UID
-    const firebaseUid = result.user.uid;
+    // 3. Dapatkan ID Token (BUKAN UID!)
+    const idToken = await result.user.getIdToken();
 
-    // 3. Register to backend
+    // 4. Register ke backend dengan ID Token
     const response = await api.post('/auth/register', {
-      firebase_uid: firebaseUid,
+      id_token: idToken, // ✅ ID Token dari Firebase, bukan UID
       phone_number: phoneNumber,
       name: userData.name,
       email: userData.email,
@@ -865,17 +924,22 @@ const registerUser = async (phoneNumber, userData) => {
     if (response.data.success) {
       const { user, token } = response.data.data;
 
-      // 4. Save token to secure storage
+      // 5. Save Sanctum token to secure storage
       await SecureStore.setItemAsync('auth_token', token);
       await SecureStore.setItemAsync('user_data', JSON.stringify(user));
 
-      // 5. Navigate to home
+      // 6. Navigate to home
       navigation.navigate('Home');
     }
   } catch (error) {
     if (error.response?.status === 409) {
       // User already exists, redirect to login
-      console.log('User already registered, please login');
+      Alert.alert('Error', 'User already registered, please login instead');
+      navigation.navigate('Login');
+    } else if (error.response?.status === 422) {
+      // Validation error
+      const errors = error.response.data.errors;
+      console.error('Validation errors:', errors);
     } else {
       console.error('Registration failed:', error.response?.data?.message);
     }
@@ -887,35 +951,41 @@ const registerUser = async (phoneNumber, userData) => {
 ```javascript
 const loginUser = async (phoneNumber) => {
   try {
-    // 1. Verify phone with Firebase
+    // 1. Kirim OTP ke nomor telepon via Firebase
     const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+
+    // 2. User input kode OTP
     const result = await confirmationResult.confirm(verificationCode);
 
-    // 2. Get Firebase UID
-    const firebaseUid = result.user.uid;
+    // 3. Dapatkan ID Token (BUKAN UID!)
+    const idToken = await result.user.getIdToken();
 
-    // 3. Login to backend
+    // 4. Login ke backend dengan ID Token
     const response = await api.post('/auth/login', {
-      firebase_uid: firebaseUid,
+      id_token: idToken, // ✅ ID Token dari Firebase, bukan UID
       fcm_token: await getFCMToken(),
     });
 
     if (response.data.success) {
       const { user, token } = response.data.data;
 
-      // 4. Save token to secure storage
+      // 5. Save Sanctum token to secure storage
       await SecureStore.setItemAsync('auth_token', token);
       await SecureStore.setItemAsync('user_data', JSON.stringify(user));
 
-      // 5. Navigate to home
+      // 6. Navigate to home
       navigation.navigate('Home');
     }
   } catch (error) {
     if (error.response?.status === 404) {
       // User not found, redirect to register
-      console.log('User not found, please register first');
+      Alert.alert('Error', 'User not found, please register first');
       navigation.navigate('Register');
     } else {
+      console.error('Login failed:', error.response?.data?.message);
+    }
+  }
+};
       console.error('Login failed:', error.response?.data?.message);
     }
   }

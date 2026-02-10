@@ -24,13 +24,20 @@ class AuthController extends Controller
     }
 
     /**
-     * Register with Firebase
-     * Mendaftarkan user baru dengan Firebase UID
+     * Register with Firebase Phone Authentication
+     *
+     * FLOW:
+     * 1. Frontend: User input nomor telepon
+     * 2. Frontend: Firebase kirim OTP ke nomor telepon
+     * 3. Frontend: User input kode OTP
+     * 4. Frontend: Firebase verify OTP → dapat ID Token
+     * 5. Frontend: Kirim ID Token + data user ke endpoint ini
+     * 6. Backend: Verify ID Token → extract UID → register user
      */
     public function registerWithFirebase(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'firebase_uid' => 'required|string',
+            'id_token' => 'required|string', // ID Token dari Firebase Phone Auth
             'phone_number' => 'required|string|unique:users,phone_number',
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:users,email',
@@ -43,18 +50,21 @@ class AuthController extends Controller
         }
 
         try {
-            // Verify Firebase ID Token
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->firebase_uid);
+            // Verify Firebase ID Token (dari hasil OTP verification)
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->id_token);
+
+            // Extract Firebase UID from verified token
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
 
             // Check if user already exists
-            $existingUser = User::where('firebase_uid', $request->firebase_uid)->first();
+            $existingUser = User::where('firebase_uid', $firebaseUid)->first();
             if ($existingUser) {
                 return $this->errorResponse('User already registered. Please login instead.', null, 409);
             }
 
             // Create new user
             $user = User::create([
-                'firebase_uid' => $request->firebase_uid,
+                'firebase_uid' => $firebaseUid,
                 'phone_number' => $request->phone_number,
                 'name' => $request->name,
                 'email' => $request->email,
@@ -63,7 +73,7 @@ class AuthController extends Controller
                 'role' => 'user',
             ]);
 
-            // Create token
+            // Create Sanctum token
             $token = $user->createToken('mobile-app-token')->plainTextToken;
 
             return $this->successResponse([
@@ -76,13 +86,20 @@ class AuthController extends Controller
     }
 
     /**
-     * Login with Firebase
-     * Login untuk user yang sudah terdaftar
+     * Login with Firebase Phone Authentication
+     *
+     * FLOW:
+     * 1. Frontend: User input nomor telepon
+     * 2. Frontend: Firebase kirim OTP ke nomor telepon
+     * 3. Frontend: User input kode OTP
+     * 4. Frontend: Firebase verify OTP → dapat ID Token
+     * 5. Frontend: Kirim ID Token ke endpoint ini
+     * 6. Backend: Verify ID Token → extract UID → login user
      */
     public function loginWithFirebase(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'firebase_uid' => 'required|string',
+            'id_token' => 'required|string', // ID Token dari Firebase Phone Auth
             'fcm_token' => 'nullable|string',
         ]);
 
@@ -91,11 +108,14 @@ class AuthController extends Controller
         }
 
         try {
-            // Verify Firebase ID Token
-            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->firebase_uid);
+            // Verify Firebase ID Token (dari hasil OTP verification)
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->id_token);
+
+            // Extract Firebase UID from verified token
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
 
             // Find user by Firebase UID
-            $user = User::where('firebase_uid', $request->firebase_uid)->first();
+            $user = User::where('firebase_uid', $firebaseUid)->first();
 
             if (!$user) {
                 return $this->errorResponse('User not found. Please register first.', null, 404);
@@ -106,7 +126,7 @@ class AuthController extends Controller
                 $user->update(['fcm_token' => $request->fcm_token]);
             }
 
-            // Create token
+            // Create Sanctum token
             $token = $user->createToken('mobile-app-token')->plainTextToken;
 
             return $this->successResponse([
