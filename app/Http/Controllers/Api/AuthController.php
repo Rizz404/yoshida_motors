@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Auth as FirebaseAuth;
@@ -19,8 +20,28 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
-        $this->firebaseAuth = $factory->createAuth();
+        try {
+            $credentials = config('services.firebase.credentials');
+
+            // Support both absolute paths and relative paths from base_path
+            if ($credentials && !str_starts_with($credentials, '/') && !str_contains($credentials, ':\\') && !str_starts_with($credentials, '{')) {
+                $credentials = base_path($credentials);
+            }
+
+            $factory = (new Factory)->withServiceAccount($credentials);
+            $this->firebaseAuth = $factory->createAuth();
+        } catch (\Exception $e) {
+            $this->firebaseAuth = null;
+            Log::error('Firebase initialization failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Return error if Firebase is not initialized.
+     */
+    private function firebaseNotAvailable(): bool
+    {
+        return $this->firebaseAuth === null;
     }
 
     /**
@@ -36,6 +57,10 @@ class AuthController extends Controller
      */
     public function registerWithFirebase(Request $request)
     {
+        if ($this->firebaseNotAvailable()) {
+            return $this->errorResponse('Firebase service is not configured correctly.', null, 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'id_token' => 'required|string', // ID Token dari Firebase Phone Auth
             'phone_number' => 'required|string|unique:users,phone_number',
@@ -98,6 +123,10 @@ class AuthController extends Controller
      */
     public function loginWithFirebase(Request $request)
     {
+        if ($this->firebaseNotAvailable()) {
+            return $this->errorResponse('Firebase service is not configured correctly.', null, 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'id_token' => 'required|string', // ID Token dari Firebase Phone Auth
             'fcm_token' => 'nullable|string',
@@ -149,6 +178,10 @@ class AuthController extends Controller
      */
     public function registerWithEmailPassword(Request $request)
     {
+        if ($this->firebaseNotAvailable()) {
+            return $this->errorResponse('Firebase service is not configured correctly.', null, 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'id_token'     => 'required|string',
             'name'         => 'nullable|string|max:255',
@@ -214,6 +247,10 @@ class AuthController extends Controller
      */
     public function loginWithEmailPassword(Request $request)
     {
+        if ($this->firebaseNotAvailable()) {
+            return $this->errorResponse('Firebase service is not configured correctly.', null, 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'id_token'  => 'required|string',
             'fcm_token' => 'nullable|string',
@@ -264,6 +301,10 @@ class AuthController extends Controller
      */
     public function loginWithGoogle(Request $request)
     {
+        if ($this->firebaseNotAvailable()) {
+            return $this->errorResponse('Firebase service is not configured correctly.', null, 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'id_token'  => 'required|string',
             'fcm_token' => 'nullable|string',
