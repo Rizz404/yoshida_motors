@@ -8,10 +8,22 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->name('api.v1.')->group(function () {
 
     // Public routes
+
+    // Phone OTP
     Route::post('/auth/register', [AuthController::class, 'registerWithFirebase'])
         ->name('auth.register');
     Route::post('/auth/login', [AuthController::class, 'loginWithFirebase'])
         ->name('auth.login');
+
+    // Email & Password
+    Route::post('/auth/register/email', [AuthController::class, 'registerWithEmailPassword'])
+        ->name('auth.register.email');
+    Route::post('/auth/login/email', [AuthController::class, 'loginWithEmailPassword'])
+        ->name('auth.login.email');
+
+    // Google Sign-In (auto register + login)
+    Route::post('/auth/login/google', [AuthController::class, 'loginWithGoogle'])
+        ->name('auth.login.google');
 
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {

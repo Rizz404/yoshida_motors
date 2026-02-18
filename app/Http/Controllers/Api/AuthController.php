@@ -139,6 +139,191 @@ class AuthController extends Controller
     }
 
     /**
+     * Register with Firebase Email/Password Authentication
+     *
+     * FLOW:
+     * 1. Frontend: User input email + password
+     * 2. Frontend: Firebase createUserWithEmailAndPassword() → dapat ID Token
+     * 3. Frontend: Kirim ID Token + data user ke endpoint ini
+     * 4. Backend: Verify ID Token → extract UID + email → register user
+     */
+    public function registerWithEmailPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id_token'     => 'required|string',
+            'name'         => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|unique:users,phone_number',
+            'address'      => 'nullable|string',
+            'fcm_token'    => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
+
+        try {
+            // Verify Firebase ID Token
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->id_token);
+
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+            $email       = $verifiedIdToken->claims()->get('email');
+
+            if (!$email) {
+                return $this->errorResponse('Email not found in Firebase token.', null, 422);
+            }
+
+            // Check if user already exists
+            $existingUser = User::where('firebase_uid', $firebaseUid)
+                ->orWhere('email', $email)
+                ->first();
+
+            if ($existingUser) {
+                return $this->errorResponse('User already registered. Please login instead.', null, 409);
+            }
+
+            // Create new user
+            $user = User::create([
+                'firebase_uid' => $firebaseUid,
+                'email'        => $email,
+                'name'         => $request->name,
+                'phone_number' => $request->phone_number,
+                'address'      => $request->address,
+                'fcm_token'    => $request->fcm_token,
+                'role'         => 'user',
+            ]);
+
+            $token = $user->createToken('mobile-app-token')->plainTextToken;
+
+            return $this->successResponse([
+                'user'  => $user,
+                'token' => $token,
+            ], 'Registration successful', 201);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Firebase authentication failed: ' . $e->getMessage(), null, 401);
+        }
+    }
+
+    /**
+     * Login with Firebase Email/Password Authentication
+     *
+     * FLOW:
+     * 1. Frontend: User input email + password
+     * 2. Frontend: Firebase signInWithEmailAndPassword() → dapat ID Token
+     * 3. Frontend: Kirim ID Token ke endpoint ini
+     * 4. Backend: Verify ID Token → extract UID → login user
+     */
+    public function loginWithEmailPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id_token'  => 'required|string',
+            'fcm_token' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
+
+        try {
+            // Verify Firebase ID Token
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->id_token);
+
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+
+            $user = User::where('firebase_uid', $firebaseUid)->first();
+
+            if (!$user) {
+                return $this->errorResponse('User not found. Please register first.', null, 404);
+            }
+
+            if ($request->has('fcm_token')) {
+                $user->update(['fcm_token' => $request->fcm_token]);
+            }
+
+            $token = $user->createToken('mobile-app-token')->plainTextToken;
+
+            return $this->successResponse([
+                'user'  => $user,
+                'token' => $token,
+            ], 'Login successful');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Firebase authentication failed: ' . $e->getMessage(), null, 401);
+        }
+    }
+
+    /**
+     * Login or Register with Google Sign-In (Firebase)
+     *
+     * FLOW:
+     * 1. Frontend: User tap "Sign in with Google"
+     * 2. Frontend: Firebase signInWithCredential(GoogleAuthProvider) → dapat ID Token
+     * 3. Frontend: Kirim ID Token ke endpoint ini
+     * 4. Backend: Verify ID Token → extract UID + email + name → auto register atau login
+     *
+     * NOTE: Google sign-in menggabungkan register & login dalam satu endpoint
+     * karena Google sudah verify email, jadi aman untuk auto-create user.
+     */
+    public function loginWithGoogle(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id_token'  => 'required|string',
+            'fcm_token' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
+
+        try {
+            // Verify Firebase ID Token
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->id_token);
+
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+            $email       = $verifiedIdToken->claims()->get('email');
+            $name        = $verifiedIdToken->claims()->get('name');
+
+            if (!$email) {
+                return $this->errorResponse('Email not found in Google token.', null, 422);
+            }
+
+            // Find existing user by firebase_uid or email
+            $user = User::where('firebase_uid', $firebaseUid)
+                ->orWhere('email', $email)
+                ->first();
+
+            $isNewUser = false;
+
+            if (!$user) {
+                // Auto-register: Google sudah verify email
+                $user = User::create([
+                    'firebase_uid' => $firebaseUid,
+                    'email'        => $email,
+                    'name'         => $name,
+                    'fcm_token'    => $request->fcm_token,
+                    'role'         => 'user',
+                ]);
+                $isNewUser = true;
+            } else {
+                // Update firebase_uid jika user sebelumnya daftar via phone/email-password
+                $updates = ['firebase_uid' => $firebaseUid];
+                if ($request->has('fcm_token')) {
+                    $updates['fcm_token'] = $request->fcm_token;
+                }
+                $user->update($updates);
+            }
+
+            $token = $user->createToken('mobile-app-token')->plainTextToken;
+
+            return $this->successResponse([
+                'user'       => $user,
+                'token'      => $token,
+                'is_new_user' => $isNewUser,
+            ], $isNewUser ? 'Registration successful' : 'Login successful', $isNewUser ? 201 : 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Firebase authentication failed: ' . $e->getMessage(), null, 401);
+        }
+    }
+
+    /**
      * Update User Profile
      */
     public function updateProfile(Request $request)

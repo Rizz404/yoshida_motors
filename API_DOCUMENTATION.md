@@ -62,7 +62,18 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ## 📱 Authentication Endpoints
 
-### 1. Register with Firebase
+> Backend selalu menggunakan `verifyIdToken()` dari Firebase Admin SDK untuk semua metode auth.
+> Yang berbeda hanya cara frontend mendapatkan ID Token tersebut.
+
+| Metode           | Register Endpoint           | Login Endpoint                                  |
+| ---------------- | --------------------------- | ----------------------------------------------- |
+| Phone OTP        | `POST /auth/register`       | `POST /auth/login`                              |
+| Email & Password | `POST /auth/register/email` | `POST /auth/login/email`                        |
+| Google Sign-In   | —                           | `POST /auth/login/google` (auto register+login) |
+
+---
+
+### 1. Register with Firebase (Phone OTP)
 **Endpoint:** `POST /auth/register`
 **Auth Required:** No
 
@@ -154,7 +165,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 2. Login with Firebase
+### 2. Login with Firebase (Phone OTP)
 **Endpoint:** `POST /auth/login`
 **Auth Required:** No
 
@@ -230,7 +241,259 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 3. Get User Profile
+### 3. Register with Email & Password
+**Endpoint:** `POST /auth/register/email`
+**Auth Required:** No
+
+**Flow yang Terjadi:**
+1. ✅ User input **email + password** di app
+2. ✅ Frontend: Firebase `createUserWithEmailAndPassword(email, password)`
+3. ✅ Frontend: `result.user.getIdToken()` → dapat **ID Token**
+4. ✅ Frontend kirim **ID Token** + data user ke endpoint ini
+5. ✅ Backend verify ID Token → extract UID + email → register user
+
+**Request Body:**
+```json
+{
+  "id_token": "string (required) - ID Token dari Firebase setelah createUserWithEmailAndPassword",
+  "name": "string (optional, max:255)",
+  "phone_number": "string (optional, unique)",
+  "address": "string (optional)",
+  "fcm_token": "string (optional)"
+}
+```
+
+> ⚠️ Email diambil otomatis dari **claims ID Token** Firebase, tidak perlu dikirim ulang dari frontend.
+
+**Example:**
+```json
+{
+  "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ij...",
+  "name": "John Doe",
+  "phone_number": "+628123456789",
+  "address": "Jakarta Selatan",
+  "fcm_token": "fcm_device_token_here"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "user": {
+      "id": 2,
+      "firebase_uid": "def456xyz",
+      "email": "john@example.com",
+      "name": "John Doe",
+      "phone_number": "+628123456789",
+      "address": "Jakarta Selatan",
+      "role": "user",
+      "fcm_token": "fcm_device_token_here",
+      "created_at": "2026-02-09T10:00:00.000000Z",
+      "updated_at": "2026-02-09T10:00:00.000000Z"
+    },
+    "token": "2|abc123tokenxyz..."
+  }
+}
+```
+
+**Error Response (409) - User Already Exists:**
+```json
+{
+  "success": false,
+  "message": "User already registered. Please login instead.",
+  "errors": null
+}
+```
+
+**Error Response (422) - Email Not in Token:**
+```json
+{
+  "success": false,
+  "message": "Email not found in Firebase token.",
+  "errors": null
+}
+```
+
+---
+
+### 4. Login with Email & Password
+**Endpoint:** `POST /auth/login/email`
+**Auth Required:** No
+
+**Flow yang Terjadi:**
+1. ✅ User input **email + password** di app
+2. ✅ Frontend: Firebase `signInWithEmailAndPassword(email, password)`
+3. ✅ Frontend: `result.user.getIdToken()` → dapat **ID Token**
+4. ✅ Frontend kirim **ID Token** ke endpoint ini
+5. ✅ Backend verify ID Token → extract UID → login user
+
+**Request Body:**
+```json
+{
+  "id_token": "string (required) - ID Token dari Firebase setelah signInWithEmailAndPassword",
+  "fcm_token": "string (optional) - Update FCM token jika device berubah"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 2,
+      "firebase_uid": "def456xyz",
+      "email": "john@example.com",
+      "name": "John Doe",
+      "phone_number": "+628123456789",
+      "address": "Jakarta Selatan",
+      "role": "user",
+      "fcm_token": "new_fcm_token_if_changed",
+      "created_at": "2026-02-09T10:00:00.000000Z",
+      "updated_at": "2026-02-09T10:30:00.000000Z"
+    },
+    "token": "3|new_access_token_xyz..."
+  }
+}
+```
+
+**Error Response (404) - User Not Found:**
+```json
+{
+  "success": false,
+  "message": "User not found. Please register first.",
+  "errors": null
+}
+```
+
+**Error Response (401) - Firebase Verification Failed:**
+```json
+{
+  "success": false,
+  "message": "Firebase authentication failed: Invalid token",
+  "errors": null
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "id_token": ["The id token field is required."]
+  }
+}
+```
+
+---
+
+### 5. Login / Register with Google Sign-In
+**Endpoint:** `POST /auth/login/google`
+**Auth Required:** No
+
+> **Endpoint ini menggabungkan register & login dalam satu hit.**
+> Jika user belum ada → otomatis register. Jika sudah ada → login.
+> Gunakan field `is_new_user` di response untuk menentukan apakah perlu tampilkan onboarding.
+
+**Flow yang Terjadi:**
+1. ✅ User tap tombol **"Sign in with Google"**
+2. ✅ Frontend: Google OAuth → `GoogleAuthProvider.credential(googleIdToken)`
+3. ✅ Frontend: Firebase `signInWithCredential()` → dapat **Firebase ID Token**
+4. ✅ Frontend kirim **Firebase ID Token** ke endpoint ini
+5. ✅ Backend verify token → extract UID + email + name → auto register atau login
+
+**Request Body:**
+```json
+{
+  "id_token": "string (required) - Firebase ID Token (BUKAN Google ID Token langsung)",
+  "fcm_token": "string (optional)"
+}
+```
+
+> ⚠️ Yang dikirim adalah **Firebase ID Token** (dari `result.user.getIdToken()`), bukan raw Google ID Token.
+
+**Example:**
+```json
+{
+  "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ij...",
+  "fcm_token": "fcm_device_token_here"
+}
+```
+
+**Success Response (200) - User Sudah Ada (Login):**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 3,
+      "firebase_uid": "ghi789xyz",
+      "email": "jane@gmail.com",
+      "name": "Jane Doe",
+      "phone_number": null,
+      "address": null,
+      "role": "user",
+      "fcm_token": "fcm_device_token_here",
+      "created_at": "2026-02-01T08:00:00.000000Z",
+      "updated_at": "2026-02-09T10:00:00.000000Z"
+    },
+    "token": "4|google_login_token...",
+    "is_new_user": false
+  }
+}
+```
+
+**Success Response (201) - User Baru (Auto Register):**
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "user": {
+      "id": 4,
+      "firebase_uid": "jkl012xyz",
+      "email": "newuser@gmail.com",
+      "name": "New User",
+      "phone_number": null,
+      "address": null,
+      "role": "user",
+      "fcm_token": "fcm_device_token_here",
+      "created_at": "2026-02-09T11:00:00.000000Z",
+      "updated_at": "2026-02-09T11:00:00.000000Z"
+    },
+    "token": "5|google_new_token...",
+    "is_new_user": true
+  }
+}
+```
+
+**Error Response (422) - Email Not in Token:**
+```json
+{
+  "success": false,
+  "message": "Email not found in Google token.",
+  "errors": null
+}
+```
+
+**Error Response (401) - Firebase Verification Failed:**
+```json
+{
+  "success": false,
+  "message": "Firebase authentication failed: Invalid token",
+  "errors": null
+}
+```
+
+---
+
+### 6. Get User Profile
 **Endpoint:** `GET /auth/profile`
 **Auth Required:** Yes
 
@@ -267,7 +530,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 4. Update User Profile
+### 7. Update User Profile
 **Endpoint:** `PUT /auth/profile`
 **Auth Required:** Yes
 
@@ -314,7 +577,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 5. Logout
+### 8. Logout
 **Endpoint:** `POST /auth/logout`
 **Auth Required:** Yes
 
@@ -839,27 +1102,45 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 
 ## 🔐 Authentication Flow
 
-### First Time User (Register)
+### Phone OTP — Register
 1. User input **nomor telepon** di aplikasi mobile
-2. Firebase kirim **OTP** ke nomor telepon
+2. Firebase kirim **OTP** via SMS
 3. User input **kode OTP**
 4. Firebase verify OTP → dapat **ID Token**
-5. Frontend kirim **ID Token** + data profil ke endpoint `POST /auth/register`
-6. Backend verify ID Token dengan Firebase SDK → extract Firebase UID
-7. Backend create user dan return `token` (Sanctum token)
-8. Simpan `token` di secure storage (AsyncStorage/SecureStore)
-9. Navigasi ke halaman utama aplikasi
+5. Frontend kirim **ID Token** + data profil ke `POST /auth/register`
+6. Backend verify ID Token → extract Firebase UID → create user
+7. Backend return `token` (Sanctum token)
+8. Simpan `token` di secure storage
 
-### Returning User (Login)
-1. User input **nomor telepon** di aplikasi mobile (sama seperti register)
-2. Firebase kirim **OTP** ke nomor telepon
+### Phone OTP — Login
+1. User input **nomor telepon**
+2. Firebase kirim **OTP** via SMS
 3. User input **kode OTP**
 4. Firebase verify OTP → dapat **ID Token**
-5. Frontend kirim **ID Token** ke endpoint `POST /auth/login`
-6. Backend verify ID Token → cari user berdasarkan Firebase UID
-7. Backend return `user` data dan `token` baru
-8. Update `token` di secure storage
-9. Navigasi ke halaman utama aplikasi
+5. Frontend kirim `id_token` ke `POST /auth/login`
+6. Backend return `user` + `token` baru
+
+### Email & Password — Register
+1. User input **email + password**
+2. Firebase `createUserWithEmailAndPassword()` → dapat **ID Token**
+3. Frontend kirim `id_token` + data ke `POST /auth/register/email`
+4. Backend extract email dari token claims → create user
+5. Backend return `token`
+
+### Email & Password — Login
+1. User input **email + password**
+2. Firebase `signInWithEmailAndPassword()` → dapat **ID Token**
+3. Frontend kirim `id_token` ke `POST /auth/login/email`
+4. Backend return `user` + `token`
+
+### Google Sign-In — Login / Auto Register
+1. User tap **"Sign in with Google"**
+2. Google OAuth → `GoogleAuthProvider.credential(googleIdToken)`
+3. Firebase `signInWithCredential()` → dapat **Firebase ID Token**
+4. Frontend kirim `id_token` ke `POST /auth/login/google`
+5. Backend auto-register jika user baru, atau login jika sudah ada
+6. Backend return `user` + `token` + `is_new_user`
+7. Jika `is_new_user: true` → tampilkan onboarding / isi profil lengkap
 
 ### Authenticated Requests
 - Untuk semua request berikutnya, kirim token di header: `Authorization: Bearer {token}`
@@ -894,13 +1175,13 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 
 ### Authentication with Firebase
 
-#### Register Flow
+#### Phone OTP — Register
 ```javascript
 import { auth } from './firebase-config';
 import { signInWithPhoneNumber } from 'firebase/auth';
 import api from './api-service';
 
-const registerUser = async (phoneNumber, userData) => {
+const registerWithPhone = async (phoneNumber, verificationCode, userData) => {
   try {
     // 1. Kirim OTP ke nomor telepon via Firebase
     const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
@@ -913,33 +1194,26 @@ const registerUser = async (phoneNumber, userData) => {
 
     // 4. Register ke backend dengan ID Token
     const response = await api.post('/auth/register', {
-      id_token: idToken, // ✅ ID Token dari Firebase, bukan UID
+      id_token: idToken,
       phone_number: phoneNumber,
       name: userData.name,
       email: userData.email,
       address: userData.address,
-      fcm_token: await getFCMToken(), // Get from Firebase Messaging
+      fcm_token: await getFCMToken(),
     });
 
     if (response.data.success) {
       const { user, token } = response.data.data;
-
-      // 5. Save Sanctum token to secure storage
       await SecureStore.setItemAsync('auth_token', token);
       await SecureStore.setItemAsync('user_data', JSON.stringify(user));
-
-      // 6. Navigate to home
       navigation.navigate('Home');
     }
   } catch (error) {
     if (error.response?.status === 409) {
-      // User already exists, redirect to login
       Alert.alert('Error', 'User already registered, please login instead');
       navigation.navigate('Login');
     } else if (error.response?.status === 422) {
-      // Validation error
-      const errors = error.response.data.errors;
-      console.error('Validation errors:', errors);
+      console.error('Validation errors:', error.response.data.errors);
     } else {
       console.error('Registration failed:', error.response?.data?.message);
     }
@@ -947,38 +1221,27 @@ const registerUser = async (phoneNumber, userData) => {
 };
 ```
 
-#### Login Flow
+#### Phone OTP — Login
 ```javascript
-const loginUser = async (phoneNumber) => {
+const loginWithPhone = async (phoneNumber, verificationCode) => {
   try {
-    // 1. Kirim OTP ke nomor telepon via Firebase
     const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-
-    // 2. User input kode OTP
     const result = await confirmationResult.confirm(verificationCode);
-
-    // 3. Dapatkan ID Token (BUKAN UID!)
     const idToken = await result.user.getIdToken();
 
-    // 4. Login ke backend dengan ID Token
     const response = await api.post('/auth/login', {
-      id_token: idToken, // ✅ ID Token dari Firebase, bukan UID
+      id_token: idToken,
       fcm_token: await getFCMToken(),
     });
 
     if (response.data.success) {
       const { user, token } = response.data.data;
-
-      // 5. Save Sanctum token to secure storage
       await SecureStore.setItemAsync('auth_token', token);
       await SecureStore.setItemAsync('user_data', JSON.stringify(user));
-
-      // 6. Navigate to home
       navigation.navigate('Home');
     }
   } catch (error) {
     if (error.response?.status === 404) {
-      // User not found, redirect to register
       Alert.alert('Error', 'User not found, please register first');
       navigation.navigate('Register');
     } else {
@@ -986,8 +1249,118 @@ const loginUser = async (phoneNumber) => {
     }
   }
 };
+```
+
+#### Email & Password — Register
+```javascript
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+
+const registerWithEmail = async (email, password, userData) => {
+  try {
+    // 1. Buat akun di Firebase
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+
+    // 2. Dapatkan ID Token
+    const idToken = await result.user.getIdToken();
+
+    // 3. Register ke backend (email diambil otomatis dari token)
+    const response = await api.post('/auth/register/email', {
+      id_token: idToken,
+      name: userData.name,
+      phone_number: userData.phoneNumber,
+      address: userData.address,
+      fcm_token: await getFCMToken(),
+    });
+
+    if (response.data.success) {
+      const { user, token } = response.data.data;
+      await SecureStore.setItemAsync('auth_token', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(user));
+      navigation.navigate('Home');
+    }
+  } catch (error) {
+    if (error.response?.status === 409) {
+      Alert.alert('Error', 'Email already registered, please login instead');
+    } else {
+      console.error('Registration failed:', error.response?.data?.message);
+    }
+  }
+};
+```
+
+#### Email & Password — Login
+```javascript
+import { signInWithEmailAndPassword } from 'firebase/auth';
+
+const loginWithEmail = async (email, password) => {
+  try {
+    // 1. Login di Firebase
+    const result = await signInWithEmailAndPassword(auth, email, password);
+
+    // 2. Dapatkan ID Token
+    const idToken = await result.user.getIdToken();
+
+    // 3. Login ke backend
+    const response = await api.post('/auth/login/email', {
+      id_token: idToken,
+      fcm_token: await getFCMToken(),
+    });
+
+    if (response.data.success) {
+      const { user, token } = response.data.data;
+      await SecureStore.setItemAsync('auth_token', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(user));
+      navigation.navigate('Home');
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      Alert.alert('Error', 'User not found, please register first');
+      navigation.navigate('RegisterEmail');
+    } else {
       console.error('Login failed:', error.response?.data?.message);
     }
+  }
+};
+```
+
+#### Google Sign-In
+```javascript
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+const loginWithGoogle = async () => {
+  try {
+    // 1. Google Sign-In → dapat Google ID Token
+    await GoogleSignin.hasPlayServices();
+    const { idToken: googleIdToken } = await GoogleSignin.signIn();
+
+    // 2. Buat Firebase credential dari Google ID Token
+    const googleCredential = GoogleAuthProvider.credential(googleIdToken);
+
+    // 3. Sign in ke Firebase → dapat Firebase ID Token
+    const result = await signInWithCredential(auth, googleCredential);
+    const idToken = await result.user.getIdToken(); // ⚠️ Ini Firebase ID Token, BUKAN Google ID Token
+
+    // 4. Login/register ke backend (satu endpoint)
+    const response = await api.post('/auth/login/google', {
+      id_token: idToken,
+      fcm_token: await getFCMToken(),
+    });
+
+    if (response.data.success) {
+      const { user, token, is_new_user } = response.data.data;
+      await SecureStore.setItemAsync('auth_token', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(user));
+
+      // Tampilkan onboarding jika user baru (belum punya phone/address)
+      if (is_new_user) {
+        navigation.navigate('CompleteProfile');
+      } else {
+        navigation.navigate('Home');
+      }
+    }
+  } catch (error) {
+    console.error('Google Sign-In failed:', error.response?.data?.message);
   }
 };
 ```
