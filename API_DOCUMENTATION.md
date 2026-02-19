@@ -65,15 +65,124 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 > Backend selalu menggunakan `verifyIdToken()` dari Firebase Admin SDK untuk semua metode auth.
 > Yang berbeda hanya cara frontend mendapatkan ID Token tersebut.
 
-| Metode           | Register Endpoint           | Login Endpoint                                  |
-| ---------------- | --------------------------- | ----------------------------------------------- |
-| Phone OTP        | `POST /auth/register`       | `POST /auth/login`                              |
-| Email & Password | `POST /auth/register/email` | `POST /auth/login/email`                        |
-| Google Sign-In   | —                           | `POST /auth/login/google` (auto register+login) |
+| Metode           | Endpoint                    | Keterangan                                                       |
+| ---------------- | --------------------------- | ---------------------------------------------------------------- |
+| Phone OTP        | `POST /auth/phone`          | **Recommended** — combined login/register, returns `is_new_user` |
+| Phone OTP        | `POST /auth/register`       | Legacy — register only (error jika user sudah ada)               |
+| Phone OTP        | `POST /auth/login`          | Legacy — login only (error jika user belum ada)                  |
+| Email & Password | `POST /auth/register/email` | Register dengan email/password                                   |
+| Email & Password | `POST /auth/login/email`    | Login dengan email/password                                      |
+| Google Sign-In   | `POST /auth/login/google`   | Combined login/register, returns `is_new_user`                   |
 
 ---
 
-### 1. Register with Firebase (Phone OTP)
+### 1. Login or Register with Phone OTP (Combined — Recommended)
+**Endpoint:** `POST /auth/phone`
+**Auth Required:** No
+
+> **Endpoint ini menggabungkan register & login dalam satu hit.** Digunakan oleh `register_screen.dart` setelah OTP berhasil diverifikasi.
+> - Jika user belum ada → otomatis register (`is_new_user: true`) → navigasi ke `profile_screen`
+> - Jika sudah ada → login (`is_new_user: false`) → navigasi ke `home_screen`
+
+**Flow yang Terjadi:**
+1. ✅ User input **nomor telepon** di app
+2. ✅ Firebase kirim **OTP** ke nomor telepon
+3. ✅ User input **kode OTP**
+4. ✅ Firebase verify OTP → dapat **ID Token**
+5. ✅ Frontend kirim **ID Token** ke endpoint ini
+6. ✅ Backend verify ID Token → cari user by UID → login atau auto-register
+
+**Request Body:**
+```json
+{
+  "id_token": "string (required) - ID Token dari Firebase setelah OTP berhasil",
+  "phone_number": "string (optional) - Nomor telepon format E.164 (+628xxx); diambil dari token jika tersedia",
+  "fcm_token": "string (optional) - Firebase Cloud Messaging token untuk push notif"
+}
+```
+
+**Example:**
+```json
+{
+  "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlOWdkazcifQ...",
+  "phone_number": "+628123456789",
+  "fcm_token": "fcm_device_token_here"
+}
+```
+
+**Success Response (200) - User Sudah Ada (Login):**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 1,
+      "firebase_uid": "abc123xyz",
+      "phone_number": "+628123456789",
+      "name": "John Doe",
+      "email": null,
+      "address": "Jakarta Selatan",
+      "role": "user",
+      "fcm_token": "fcm_device_token_here",
+      "created_at": "2026-02-09T10:00:00.000000Z",
+      "updated_at": "2026-02-09T10:30:00.000000Z"
+    },
+    "token": "1|abc123tokenxyz...",
+    "is_new_user": false
+  }
+}
+```
+
+**Success Response (201) - User Baru (Auto Register):**
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "user": {
+      "id": 5,
+      "firebase_uid": "abc123xyz",
+      "phone_number": "+628123456789",
+      "name": null,
+      "email": null,
+      "address": null,
+      "role": "user",
+      "fcm_token": "fcm_device_token_here",
+      "created_at": "2026-02-19T10:00:00.000000Z",
+      "updated_at": "2026-02-19T10:00:00.000000Z"
+    },
+    "token": "2|newtoken...",
+    "is_new_user": true
+  }
+}
+```
+
+> Jika `is_new_user: true` → arahkan user ke `profile_screen` untuk mengisi nama & alamat.
+
+**Error Response (401) - Firebase Verification Failed:**
+```json
+{
+  "success": false,
+  "message": "Firebase authentication failed: Invalid token",
+  "errors": null
+}
+```
+
+**Validation Error (422):**
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "id_token": ["The id token field is required."]
+  }
+}
+```
+
+---
+
+### 2. Register with Firebase (Phone OTP) — Legacy
 **Endpoint:** `POST /auth/register`
 **Auth Required:** No
 
@@ -165,7 +274,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 2. Login with Firebase (Phone OTP)
+### 3. Login with Firebase (Phone OTP) — Legacy
 **Endpoint:** `POST /auth/login`
 **Auth Required:** No
 
@@ -241,7 +350,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 3. Register with Email & Password
+### 4. Register with Email & Password
 **Endpoint:** `POST /auth/register/email`
 **Auth Required:** No
 
@@ -319,7 +428,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 4. Login with Email & Password
+### 5. Login with Email & Password
 **Endpoint:** `POST /auth/login/email`
 **Auth Required:** No
 
@@ -392,7 +501,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 5. Login / Register with Google Sign-In
+### 6. Login / Register with Google Sign-In
 **Endpoint:** `POST /auth/login/google`
 **Auth Required:** No
 
@@ -493,7 +602,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 6. Get User Profile
+### 7. Get User Profile
 **Endpoint:** `GET /auth/profile`
 **Auth Required:** Yes
 
@@ -530,7 +639,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 7. Update User Profile
+### 8. Update User Profile
 **Endpoint:** `PUT /auth/profile`
 **Auth Required:** Yes
 
@@ -577,7 +686,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 
 ---
 
-### 8. Logout
+### 9. Logout
 **Endpoint:** `POST /auth/logout`
 **Auth Required:** Yes
 
@@ -630,9 +739,12 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
       "vehicle_model": "Avanza",
       "year_manufacture": 2020,
       "description": "Mobil terawat, service rutin",
+      "license_plate": "B 5678 ABC",
+      "mileage": 78000,
       "status": "draft",
       "final_price": null,
-      "admin_notes": null,
+      "admin_note": null,
+      "price_valid_until": null,
       "created_at": "2026-02-01T10:00:00.000000Z",
       "updated_at": "2026-02-01T10:00:00.000000Z",
       "photos": [
@@ -664,7 +776,60 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
 
 ---
 
-### 2. Create New Appraisal Request
+### 2. Get Latest Appraisal Request
+**Endpoint:** `GET /appraisals/latest`
+**Auth Required:** Yes
+
+Digunakan oleh `home_screen.dart` untuk menampilkan status card appraisal aktif.
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Latest appraisal request retrieved successfully",
+  "data": {
+    "id": 5,
+    "user_id": 1,
+    "vehicle_brand": "Honda",
+    "vehicle_model": "Jazz RS",
+    "year_manufacture": 2022,
+    "description": "Mobil terawat",
+    "license_plate": "B 1234 XYZ",
+    "mileage": 45000,
+    "status": "submitted",
+    "final_price": null,
+    "admin_note": null,
+    "price_valid_until": null,
+    "created_at": "2026-02-09T15:00:00.000000Z",
+    "updated_at": "2026-02-09T17:00:00.000000Z",
+    "photos": [
+      {
+        "id": 10,
+        "appraisal_request_id": 5,
+        "category_name": "Tampak Depan",
+        "image_path": "appraisal_photos/5/xyz123.jpg",
+        "created_at": "2026-02-09T16:00:00.000000Z",
+        "updated_at": "2026-02-09T16:00:00.000000Z"
+      }
+    ]
+  }
+}
+```
+
+**Not Found Response (404) - Belum Ada Appraisal:**
+```json
+{
+  "success": false,
+  "message": "No appraisal request found",
+  "errors": null
+}
+```
+
+---
+
+### 3. Create New Appraisal Request
 **Endpoint:** `POST /appraisals`
 **Auth Required:** Yes
 
@@ -674,7 +839,9 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
   "vehicle_brand": "string (required, max:255)",
   "vehicle_model": "string (required, max:255)",
   "year_manufacture": "integer (required, min:1900, max:2027)",
-  "description": "string (optional)"
+  "description": "string (optional)",
+  "license_plate": "string (optional, max:20) - Nomor plat kendaraan",
+  "mileage": "integer (optional, min:0) - Jarak tempuh dalam km"
 }
 ```
 
@@ -684,7 +851,9 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
   "vehicle_brand": "Honda",
   "vehicle_model": "Jazz RS",
   "year_manufacture": 2022,
-  "description": "Mobil masih sangat terawat, kilometer rendah"
+  "description": "Mobil masih sangat terawat, kilometer rendah",
+  "license_plate": "B 1234 XYZ",
+  "mileage": 45000
 }
 ```
 
@@ -700,9 +869,12 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
     "vehicle_model": "Jazz RS",
     "year_manufacture": 2022,
     "description": "Mobil masih sangat terawat, kilometer rendah",
+    "license_plate": "B 1234 XYZ",
+    "mileage": 45000,
     "status": "draft",
     "final_price": null,
-    "admin_notes": null,
+    "admin_note": null,
+    "price_valid_until": null,
     "created_at": "2026-02-09T15:00:00.000000Z",
     "updated_at": "2026-02-09T15:00:00.000000Z"
   }
@@ -723,7 +895,7 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
 
 ---
 
-### 3. Get Single Appraisal Request
+### 4. Get Single Appraisal Request
 **Endpoint:** `GET /appraisals/{id}`
 **Auth Required:** Yes
 
@@ -741,9 +913,12 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
     "vehicle_model": "Avanza",
     "year_manufacture": 2020,
     "description": "Mobil terawat",
+    "license_plate": "B 5678 ABC",
+    "mileage": 78000,
     "status": "draft",
     "final_price": null,
-    "admin_notes": null,
+    "admin_note": null,
+    "price_valid_until": null,
     "created_at": "2026-02-01T10:00:00.000000Z",
     "updated_at": "2026-02-01T10:00:00.000000Z",
     "photos": [
@@ -779,7 +954,7 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
 
 ---
 
-### 4. Update Appraisal Request
+### 5. Update Appraisal Request
 **Endpoint:** `PUT /appraisals/{id}`
 **Auth Required:** Yes
 
@@ -791,7 +966,9 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
   "vehicle_brand": "string (optional, max:255)",
   "vehicle_model": "string (optional, max:255)",
   "year_manufacture": "integer (optional, min:1900, max:2027)",
-  "description": "string (optional)"
+  "description": "string (optional)",
+  "license_plate": "string (optional, max:20)",
+  "mileage": "integer (optional, min:0)"
 }
 ```
 
@@ -815,9 +992,12 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
     "vehicle_model": "Jazz RS CVT",
     "year_manufacture": 2022,
     "description": "Updated description with more details",
+    "license_plate": "B 1234 XYZ",
+    "mileage": 45000,
     "status": "draft",
     "final_price": null,
-    "admin_notes": null,
+    "admin_note": null,
+    "price_valid_until": null,
     "created_at": "2026-02-09T15:00:00.000000Z",
     "updated_at": "2026-02-09T15:30:00.000000Z"
   }
@@ -844,7 +1024,7 @@ GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture
 
 ---
 
-### 5. Upload Photo to Appraisal
+### 6. Upload Photo to Appraisal
 **Endpoint:** `POST /appraisals/{id}/photos`
 **Auth Required:** Yes
 **Content-Type:** `multipart/form-data`
@@ -903,7 +1083,7 @@ formData.append('image', fileObject);
 
 ---
 
-### 6. Delete Photo from Appraisal
+### 7. Delete Photo from Appraisal
 **Endpoint:** `DELETE /appraisals/{appraisalId}/photos/{photoId}`
 **Auth Required:** Yes
 
@@ -954,7 +1134,7 @@ DELETE /appraisals/5/photos/10
 
 ---
 
-### 7. Submit Appraisal for Review
+### 8. Submit Appraisal for Review
 **Endpoint:** `POST /appraisals/{id}/submit`
 **Auth Required:** Yes
 
@@ -976,9 +1156,12 @@ DELETE /appraisals/5/photos/10
     "vehicle_model": "Jazz RS CVT",
     "year_manufacture": 2022,
     "description": "Mobil terawat",
+    "license_plate": "B 1234 XYZ",
+    "mileage": 45000,
     "status": "submitted",
     "final_price": null,
-    "admin_notes": null,
+    "admin_note": null,
+    "price_valid_until": null,
     "created_at": "2026-02-09T15:00:00.000000Z",
     "updated_at": "2026-02-09T17:00:00.000000Z",
     "photos": [
@@ -1024,7 +1207,7 @@ DELETE /appraisals/5/photos/10
 
 ---
 
-### 8. Delete Appraisal Request
+### 9. Delete Appraisal Request
 **Endpoint:** `DELETE /appraisals/{id}`
 **Auth Required:** Yes
 
@@ -1102,7 +1285,18 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 
 ## 🔐 Authentication Flow
 
-### Phone OTP — Register
+### Phone OTP — Login / Auto Register (Recommended)
+1. User input **nomor telepon** di aplikasi mobile
+2. Firebase kirim **OTP** via SMS
+3. User input **kode OTP**
+4. Firebase verify OTP → dapat **ID Token**
+5. Frontend kirim **ID Token** ke `POST /auth/phone`
+6. Backend verify ID Token → cari user by UID → auto-register jika baru, login jika ada
+7. Backend return `user` + `token` + `is_new_user`
+8. Simpan `token` di secure storage
+9. Jika `is_new_user: true` → navigasi ke `profile_screen`; jika `false` → navigasi ke `home_screen`
+
+### Phone OTP — Register (Legacy)
 1. User input **nomor telepon** di aplikasi mobile
 2. Firebase kirim **OTP** via SMS
 3. User input **kode OTP**
@@ -1112,7 +1306,7 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 7. Backend return `token` (Sanctum token)
 8. Simpan `token` di secure storage
 
-### Phone OTP — Login
+### Phone OTP — Login (Legacy)
 1. User input **nomor telepon**
 2. Firebase kirim **OTP** via SMS
 3. User input **kode OTP**
@@ -1161,13 +1355,13 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 
 ## 🎯 Status Appraisal
 
-| Status         | Description                                          |
-| -------------- | ---------------------------------------------------- |
-| `draft`        | Baru dibuat, masih bisa edit & hapus                 |
-| `submitted`    | Sudah disubmit, menunggu review admin                |
-| `under_review` | Sedang direview oleh admin                           |
-| `completed`    | Sudah selesai, ada `final_price` dan `admin_notes`   |
-| `rejected`     | Ditolak oleh admin, lihat `admin_notes` untuk alasan |
+| Status         | Description                                         |
+| -------------- | --------------------------------------------------- |
+| `draft`        | Baru dibuat, masih bisa edit & hapus                |
+| `submitted`    | Sudah disubmit, menunggu review admin               |
+| `under_review` | Sedang direview oleh admin                          |
+| `completed`    | Sudah selesai, ada `final_price` dan `admin_note`   |
+| `rejected`     | Ditolak oleh admin, lihat `admin_note` untuk alasan |
 
 ---
 
@@ -1175,7 +1369,50 @@ Semua response mengikuti format standar dari `ApiResponseTrait`:
 
 ### Authentication with Firebase
 
-#### Phone OTP — Register
+#### Phone OTP — Login / Auto Register (Recommended)
+```javascript
+import { auth } from './firebase-config';
+import { signInWithPhoneNumber } from 'firebase/auth';
+import api from './api-service';
+
+const loginOrRegisterWithPhone = async (phoneNumber, verificationCode) => {
+  try {
+    // 1. Kirim OTP ke nomor telepon via Firebase
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+
+    // 2. User input kode OTP
+    const result = await confirmationResult.confirm(verificationCode);
+
+    // 3. Dapatkan ID Token (BUKAN UID!)
+    const idToken = await result.user.getIdToken();
+
+    // 4. Login atau register ke backend dengan satu endpoint
+    const response = await api.post('/auth/phone', {
+      id_token: idToken,
+      phone_number: phoneNumber,
+      fcm_token: await getFCMToken(),
+    });
+
+    if (response.data.success) {
+      const { user, token, is_new_user } = response.data.data;
+      await SecureStore.setItemAsync('auth_token', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(user));
+
+      // is_new_user: true → isi profil dulu di profile_screen
+      // is_new_user: false → langsung ke home_screen
+      if (is_new_user) {
+        navigation.navigate('Profile');
+      } else {
+        navigation.navigate('Home');
+      }
+    }
+  } catch (error) {
+    console.error('Phone auth failed:', error.response?.data?.message);
+  }
+};
+```
+
+#### Phone OTP — Register (Legacy)
 ```javascript
 import { auth } from './firebase-config';
 import { signInWithPhoneNumber } from 'firebase/auth';
@@ -1221,7 +1458,7 @@ const registerWithPhone = async (phoneNumber, verificationCode, userData) => {
 };
 ```
 
-#### Phone OTP — Login
+#### Phone OTP — Login (Legacy)
 ```javascript
 const loginWithPhone = async (phoneNumber, verificationCode) => {
   try {

@@ -9,7 +9,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     // Public routes
 
-    // Phone OTP
+    // Phone OTP — combined login/register (dipakai oleh register_screen.dart)
+    Route::post('/auth/phone', [AuthController::class, 'loginOrRegisterWithPhone'])
+        ->name('auth.phone');
+
+    // Phone OTP (legacy separate endpoints, tetap dipertahankan)
     Route::post('/auth/register', [AuthController::class, 'registerWithFirebase'])
         ->name('auth.register');
     Route::post('/auth/login', [AuthController::class, 'loginWithFirebase'])
@@ -37,6 +41,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         // Appraisal endpoints
         Route::prefix('appraisals')->name('appraisals.')->group(function () {
+            Route::get('/latest', [AppraisalRequestController::class, 'latest'])->name('latest');
             Route::get('/', [AppraisalRequestController::class, 'index'])->name('index');
             Route::post('/', [AppraisalRequestController::class, 'store'])->name('store');
             Route::get('/{id}', [AppraisalRequestController::class, 'show'])->name('show');

@@ -73,15 +73,35 @@ class AppraisalRequestController extends Controller
     }
 
     /**
+     * Get the latest appraisal request for the authenticated user.
+     * Used by the home screen to display the active appraisal status card.
+     */
+    public function latest(Request $request)
+    {
+        $appraisal = $request->user()->appraisalRequests()
+            ->with('photos')
+            ->latest()
+            ->first();
+
+        if (!$appraisal) {
+            return $this->notFoundResponse('No appraisal request found');
+        }
+
+        return $this->successResponse($appraisal, 'Latest appraisal request retrieved successfully');
+    }
+
+    /**
      * Create new draft appraisal request
      */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'vehicle_brand' => 'required|string|max:255',
-            'vehicle_model' => 'required|string|max:255',
+            'vehicle_brand'    => 'required|string|max:255',
+            'vehicle_model'    => 'required|string|max:255',
             'year_manufacture' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'description' => 'nullable|string',
+            'description'      => 'nullable|string',
+            'license_plate'    => 'nullable|string|max:20',
+            'mileage'          => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -89,11 +109,13 @@ class AppraisalRequestController extends Controller
         }
 
         $appraisal = $request->user()->appraisalRequests()->create([
-            'vehicle_brand' => $request->vehicle_brand,
-            'vehicle_model' => $request->vehicle_model,
+            'vehicle_brand'    => $request->vehicle_brand,
+            'vehicle_model'    => $request->vehicle_model,
             'year_manufacture' => $request->year_manufacture,
-            'description' => $request->description,
-            'status' => 'draft',
+            'description'      => $request->description,
+            'license_plate'    => $request->license_plate,
+            'mileage'          => $request->mileage,
+            'status'           => 'draft',
         ]);
 
         return $this->successResponse($appraisal, 'Appraisal request created successfully', 201);
@@ -131,17 +153,19 @@ class AppraisalRequestController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'vehicle_brand' => 'sometimes|string|max:255',
-            'vehicle_model' => 'sometimes|string|max:255',
+            'vehicle_brand'    => 'sometimes|string|max:255',
+            'vehicle_model'    => 'sometimes|string|max:255',
             'year_manufacture' => 'sometimes|integer|min:1900|max:' . (date('Y') + 1),
-            'description' => 'nullable|string',
+            'description'      => 'nullable|string',
+            'license_plate'    => 'nullable|string|max:20',
+            'mileage'          => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
             return $this->validationErrorResponse($validator->errors());
         }
 
-        $appraisal->update($request->only(['vehicle_brand', 'vehicle_model', 'year_manufacture', 'description']));
+        $appraisal->update($request->only(['vehicle_brand', 'vehicle_model', 'year_manufacture', 'description', 'license_plate', 'mileage']));
 
         return $this->successResponse($appraisal, 'Appraisal request updated successfully');
     }

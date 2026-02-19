@@ -168,6 +168,89 @@ class AuthController extends Controller
     }
 
     /**
+     * Login or Register with Firebase Phone OTP (combined endpoint)
+     *
+     * FLOW:
+     * 1. Frontend: User input nomor telepon
+     * 2. Frontend: Firebase kirim OTP ke nomor telepon
+     * 3. Frontend: User input kode OTP
+     * 4. Frontend: Firebase verify OTP → dapat ID Token
+     * 5. Frontend: Kirim ID Token ke endpoint ini
+     * 6. Backend: Verify ID Token → cari user by UID
+     *    - Jika ada → login (is_new_user: false) → navigasi ke home_screen
+     *    - Jika tidak ada → auto-register (is_new_user: true) → navigasi ke profile_screen
+     *
+     * NOTE: Digunakan oleh register_screen.dart setelah OTP berhasil diverifikasi.
+     */
+    public function loginOrRegisterWithPhone(Request $request)
+    {
+        if ($this->firebaseNotAvailable()) {
+            return $this->errorResponse('Firebase service is not configured correctly.', null, 503);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'id_token'     => 'required|string',
+            'phone_number' => 'nullable|string',
+            'fcm_token'    => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors());
+        }
+
+        try {
+            // Verify Firebase ID Token (dari hasil OTP verification)
+            $verifiedIdToken = $this->firebaseAuth->verifyIdToken($request->id_token);
+
+            // Extract Firebase UID from verified token
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+
+            // Extract phone number from token or request
+            $phoneFromToken = $verifiedIdToken->claims()->get('phone_number');
+            $phone = $phoneFromToken ?? $request->phone_number;
+
+            // Find existing user by Firebase UID
+            $user = User::where('firebase_uid', $firebaseUid)->first();
+
+            $isNewUser = false;
+
+            if (!$user) {
+                // Auto-register baru — profil akan diisi di profile_screen
+                $user = User::create([
+                    'firebase_uid' => $firebaseUid,
+                    'phone_number' => $phone,
+                    'fcm_token'    => $request->fcm_token,
+                    'role'         => 'user',
+                ]);
+                $isNewUser = true;
+            } else {
+                // Update FCM token & pastikan phone number ter-sync
+                $updates = [];
+                if ($request->has('fcm_token')) {
+                    $updates['fcm_token'] = $request->fcm_token;
+                }
+                if ($phone && !$user->phone_number) {
+                    $updates['phone_number'] = $phone;
+                }
+                if (!empty($updates)) {
+                    $user->update($updates);
+                }
+            }
+
+            // Create Sanctum token
+            $token = $user->createToken('mobile-app-token')->plainTextToken;
+
+            return $this->successResponse([
+                'user'        => $user,
+                'token'       => $token,
+                'is_new_user' => $isNewUser,
+            ], $isNewUser ? 'Registration successful' : 'Login successful', $isNewUser ? 201 : 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Firebase authentication failed: ' . $e->getMessage(), null, 401);
+        }
+    }
+
+    /**
      * Register with Firebase Email/Password Authentication
      *
      * FLOW:
