@@ -44,16 +44,16 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('/latest', [AppraisalRequestController::class, 'latest'])->name('latest');
             Route::get('/', [AppraisalRequestController::class, 'index'])->name('index');
             Route::post('/', [AppraisalRequestController::class, 'store'])->name('store');
-            Route::get('/{id}', [AppraisalRequestController::class, 'show'])->name('show');
-            Route::put('/{id}', [AppraisalRequestController::class, 'update'])->name('update');
-            Route::delete('/{id}', [AppraisalRequestController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}', [AppraisalRequestController::class, 'show'])->name('show')->whereNumber('id');
+            Route::put('/{id}', [AppraisalRequestController::class, 'update'])->name('update')->whereNumber('id');
+            Route::delete('/{id}', [AppraisalRequestController::class, 'destroy'])->name('destroy')->whereNumber('id');
 
             // Photo management
-            Route::post('/{id}/photos', [AppraisalRequestController::class, 'uploadPhoto'])->name('upload-photo');
-            Route::delete('/{appraisalId}/photos/{photoId}', [AppraisalRequestController::class, 'deletePhoto'])->name('delete-photo');
+            Route::post('/{id}/photos', [AppraisalRequestController::class, 'uploadPhoto'])->name('upload-photo')->whereNumber('id');
+            Route::delete('/{appraisalId}/photos/{photoId}', [AppraisalRequestController::class, 'deletePhoto'])->name('delete-photo')->whereNumber(['appraisalId', 'photoId']);
 
             // Submit appraisal
-            Route::post('/{id}/submit', [AppraisalRequestController::class, 'submit'])->name('submit');
+            Route::post('/{id}/submit', [AppraisalRequestController::class, 'submit'])->name('submit')->whereNumber('id');
         });
     });
 });
