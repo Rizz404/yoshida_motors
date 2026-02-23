@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AppraisalRequest;
 use App\Models\AppraisalPhoto;
 use App\Models\User;
+use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB; // Buat Transaction biar aman
 use Illuminate\Support\Facades\Log;
@@ -92,6 +93,30 @@ class AppraisalRequestController extends Controller
             }
 
             DB::commit(); // Simpan permanen kalau semua lancar
+
+            // Kirim Notifikasi ke User
+            /** @var \App\Models\User $user */
+            $user = User::find($validated['user_id']);
+            if ($user) {
+                $title = 'New Appraisal Request';
+                $body = "An appraisal request for your {$appraisalRequest->vehicle_brand} {$appraisalRequest->vehicle_model} has been created by Admin.";
+                $data = [
+                    'type' => 'appraisal_created',
+                    'appraisal_id' => (string) $appraisalRequest->id,
+                ];
+
+                // Simpan ke database
+                $user->notifications()->create([
+                    'title' => $title,
+                    'body' => $body,
+                    'data' => $data,
+                ]);
+
+                // Kirim push notif jika ada token
+                if ($user->fcm_token) {
+                    FcmService::sendToToken($user->fcm_token, $title, $body, $data);
+                }
+            }
 
             return redirect()->route('appraisals.index')->with('notify', [
                 'type' => 'success',
@@ -199,6 +224,36 @@ class AppraisalRequestController extends Controller
             }
 
             DB::commit();
+
+            // Kirim Notifikasi ke User
+            $user = $appraisal->user;
+            if ($user) {
+                $title = 'Appraisal Update';
+                $body = "Your appraisal for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} has been updated to {$appraisal->status}.";
+
+                if ($appraisal->final_price) {
+                    $formattedPrice = number_format($appraisal->final_price, 0, ',', '.');
+                    $body .= " Final price: Rp {$formattedPrice}.";
+                }
+
+                $data = [
+                    'type' => 'appraisal_updated',
+                    'appraisal_id' => (string) $appraisal->id,
+                    'status' => $appraisal->status,
+                ];
+
+                // Simpan ke database
+                $user->notifications()->create([
+                    'title' => $title,
+                    'body' => $body,
+                    'data' => $data,
+                ]);
+
+                // Kirim push notif jika ada token
+                if ($user->fcm_token) {
+                    FcmService::sendToToken($user->fcm_token, $title, $body, $data);
+                }
+            }
 
             return redirect()->route('appraisals.index')->with('notify', [
                 'type' => 'success',

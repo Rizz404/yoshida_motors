@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AppraisalRequestController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,13 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
             // Submit appraisal
             Route::post('/{id}/submit', [AppraisalRequestController::class, 'submit'])->name('submit')->whereNumber('id');
+        });
+
+        // Notification endpoints
+        Route::prefix('notifications')->name('notifications.')->group(function () {
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+            Route::put('/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read')->whereNumber('id');
         });
     });
 });

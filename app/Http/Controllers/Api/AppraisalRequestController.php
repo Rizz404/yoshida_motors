@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\AppraisalRequest;
 use App\Models\AppraisalPhoto;
+use App\Services\FcmService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -253,6 +254,35 @@ class AppraisalRequestController extends Controller
         }
 
         $appraisal->update(['status' => 'submitted']);
+
+        // Kirim Notifikasi ke Admin
+        $admins = User::where('role', 'admin')->get();
+        $adminTokens = [];
+
+        $user = $request->user();
+        $title = 'New Appraisal Submitted';
+        $body = "A new appraisal request for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} has been submitted by {$user->name}.";
+        $data = [
+            'type' => 'appraisal_submitted',
+            'appraisal_id' => (string) $appraisal->id,
+        ];
+
+        foreach ($admins as $admin) {
+            // Simpan ke database untuk setiap admin
+            $admin->notifications()->create([
+                'title' => $title,
+                'body' => $body,
+                'data' => $data,
+            ]);
+
+            if ($admin->fcm_token) {
+                $adminTokens[] = $admin->fcm_token;
+            }
+        }
+
+        if (!empty($adminTokens)) {
+            FcmService::sendToTokens($adminTokens, $title, $body, $data);
+        }
 
         return $this->successResponse($appraisal, 'Appraisal submitted successfully');
     }

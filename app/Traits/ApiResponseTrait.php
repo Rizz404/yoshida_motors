@@ -38,6 +38,33 @@ trait ApiResponseTrait
   }
 
   /**
+   * Standard Paginated Response
+   * Buat pagination biasa yang pakai nomor halaman (page 1, 2, 3, dst)
+   */
+  protected function paginatedResponse($data, string $message = 'Success'): JsonResponse
+  {
+    return response()->json([
+      'success' => true,
+      'message' => $message,
+      'data' => $data->items(),
+      'meta' => [
+        'current_page' => $data->currentPage(),
+        'last_page' => $data->lastPage(),
+        'per_page' => $data->perPage(),
+        'total' => $data->total(),
+        'from' => $data->firstItem(),
+        'to' => $data->lastItem(),
+      ],
+      'links' => [
+        'first' => $data->url(1),
+        'last' => $data->url($data->lastPage()),
+        'prev' => $data->previousPageUrl(),
+        'next' => $data->nextPageUrl(),
+      ],
+    ], 200);
+  }
+
+  /**
    * Error Response
    */
   protected function errorResponse(string $message = 'Error occurred', $errors = null, int $statusCode = 400): JsonResponse
