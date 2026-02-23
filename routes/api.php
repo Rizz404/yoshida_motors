@@ -49,10 +49,6 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::put('/{id}', [AppraisalRequestController::class, 'update'])->name('update')->whereNumber('id');
             Route::delete('/{id}', [AppraisalRequestController::class, 'destroy'])->name('destroy')->whereNumber('id');
 
-            // Photo management
-            Route::post('/{id}/photos', [AppraisalRequestController::class, 'uploadPhoto'])->name('upload-photo')->whereNumber('id');
-            Route::delete('/{appraisalId}/photos/{photoId}', [AppraisalRequestController::class, 'deletePhoto'])->name('delete-photo')->whereNumber(['appraisalId', 'photoId']);
-
             // Submit appraisal
             Route::post('/{id}/submit', [AppraisalRequestController::class, 'submit'])->name('submit')->whereNumber('id');
         });

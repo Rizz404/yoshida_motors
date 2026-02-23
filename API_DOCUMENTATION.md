@@ -832,29 +832,36 @@ Digunakan oleh `home_screen.dart` untuk menampilkan status card appraisal aktif.
 ### 3. Create New Appraisal Request
 **Endpoint:** `POST /appraisals`
 **Auth Required:** Yes
+**Content-Type:** `multipart/form-data`
 
-**Request Body:**
-```json
-{
-  "vehicle_brand": "string (required, max:255)",
-  "vehicle_model": "string (required, max:255)",
-  "year_manufacture": "integer (required, min:1900, max:2027)",
-  "description": "string (optional)",
-  "license_plate": "string (optional, max:20) - Nomor plat kendaraan",
-  "mileage": "integer (optional, min:0) - Jarak tempuh dalam km"
-}
+**Request Body (Form Data):**
+```
+vehicle_brand    : string (required, max:255)
+vehicle_model    : string (required, max:255)
+year_manufacture : integer (required, min:1900, max:2027)
+description      : string (optional)
+license_plate    : string (optional, max:20) - Nomor plat kendaraan
+mileage          : integer (optional, min:0) - Jarak tempuh dalam km
+photos[]         : array of files (optional, image: jpeg|png|jpg, max: 5MB per file)
+photo_labels[]   : array of strings (optional) - Label untuk masing-masing foto sesuai urutan
 ```
 
-**Example:**
-```json
-{
-  "vehicle_brand": "Honda",
-  "vehicle_model": "Jazz RS",
-  "year_manufacture": 2022,
-  "description": "Mobil masih sangat terawat, kilometer rendah",
-  "license_plate": "B 1234 XYZ",
-  "mileage": 45000
-}
+**Example (JavaScript FormData):**
+```javascript
+const formData = new FormData();
+formData.append('vehicle_brand', 'Honda');
+formData.append('vehicle_model', 'Jazz RS');
+formData.append('year_manufacture', '2022');
+formData.append('description', 'Mobil masih sangat terawat, kilometer rendah');
+formData.append('license_plate', 'B 1234 XYZ');
+formData.append('mileage', '45000');
+
+// Append multiple photos and their labels
+formData.append('photos[]', fileObject1);
+formData.append('photo_labels[]', 'Tampak Depan');
+
+formData.append('photos[]', fileObject2);
+formData.append('photo_labels[]', 'Tampak Belakang');
 ```
 
 **Success Response (201):**
@@ -957,27 +964,38 @@ Digunakan oleh `home_screen.dart` untuk menampilkan status card appraisal aktif.
 ### 5. Update Appraisal Request
 **Endpoint:** `PUT /appraisals/{id}`
 **Auth Required:** Yes
+**Content-Type:** `multipart/form-data` (Gunakan `_method=PUT` jika menggunakan form-data)
 
 **⚠️ Important:** Hanya bisa update appraisal dengan status `draft`
 
-**Request Body:**
-```json
-{
-  "vehicle_brand": "string (optional, max:255)",
-  "vehicle_model": "string (optional, max:255)",
-  "year_manufacture": "integer (optional, min:1900, max:2027)",
-  "description": "string (optional)",
-  "license_plate": "string (optional, max:20)",
-  "mileage": "integer (optional, min:0)"
-}
+**Request Body (Form Data):**
+```
+_method          : string (required if using multipart/form-data) - "PUT"
+vehicle_brand    : string (optional, max:255)
+vehicle_model    : string (optional, max:255)
+year_manufacture : integer (optional, min:1900, max:2027)
+description      : string (optional)
+license_plate    : string (optional, max:20)
+mileage          : integer (optional, min:0)
+new_photos[]     : array of files (optional, image: jpeg|png|jpg, max: 5MB per file)
+new_photo_labels[]: array of strings (optional) - Label untuk foto baru
+delete_photos[]  : array of integers (optional) - ID foto yang ingin dihapus
 ```
 
-**Example:**
-```json
-{
-  "vehicle_model": "Jazz RS CVT",
-  "description": "Updated description with more details"
-}
+**Example (JavaScript FormData):**
+```javascript
+const formData = new FormData();
+formData.append('_method', 'PUT');
+formData.append('vehicle_model', 'Jazz RS CVT');
+formData.append('description', 'Updated description with more details');
+
+// Add new photos
+formData.append('new_photos[]', fileObject);
+formData.append('new_photo_labels[]', 'Interior');
+
+// Delete existing photos by ID
+formData.append('delete_photos[]', '10');
+formData.append('delete_photos[]', '11');
 ```
 
 **Success Response (200):**
@@ -1024,117 +1042,7 @@ Digunakan oleh `home_screen.dart` untuk menampilkan status card appraisal aktif.
 
 ---
 
-### 6. Upload Photo to Appraisal
-**Endpoint:** `POST /appraisals/{id}/photos`
-**Auth Required:** Yes
-**Content-Type:** `multipart/form-data`
-
-**⚠️ Important:** Hanya bisa upload foto ke appraisal dengan status `draft`
-
-**Request Body (Form Data):**
-```
-category_name   : string (required, max:255) - e.g., "Tampak Depan", "Tampak Belakang", "Interior", "Dashboard"
-image           : file (required, image: jpeg|png|jpg, max: 5MB)
-```
-
-**Example:**
-```javascript
-const formData = new FormData();
-formData.append('category_name', 'Tampak Depan');
-formData.append('image', fileObject);
-```
-
-**Success Response (201):**
-```json
-{
-  "success": true,
-  "message": "Photo uploaded successfully",
-  "data": {
-    "id": 10,
-    "appraisal_request_id": 5,
-    "category_name": "Tampak Depan",
-    "image_path": "appraisal_photos/5/xyz123.jpg",
-    "created_at": "2026-02-09T16:00:00.000000Z",
-    "updated_at": "2026-02-09T16:00:00.000000Z"
-  }
-}
-```
-
-**Validation Error (422):**
-```json
-{
-  "success": false,
-  "message": "Validation failed",
-  "errors": {
-    "image": ["The image must be a file of type: jpeg, png, jpg."],
-    "category_name": ["The category name field is required."]
-  }
-}
-```
-
-**Error Response (403) - Already Submitted:**
-```json
-{
-  "success": false,
-  "message": "Cannot upload photos to submitted appraisal",
-  "errors": null
-}
-```
-
----
-
-### 7. Delete Photo from Appraisal
-**Endpoint:** `DELETE /appraisals/{appraisalId}/photos/{photoId}`
-**Auth Required:** Yes
-
-**⚠️ Important:** Hanya bisa delete foto dari appraisal dengan status `draft`
-
-**Request:** No body required
-
-**Example:**
-```
-DELETE /appraisals/5/photos/10
-```
-
-**Success Response (200):**
-```json
-{
-  "success": true,
-  "message": "Photo deleted successfully",
-  "data": null
-}
-```
-
-**Not Found Response (404) - Photo:**
-```json
-{
-  "success": false,
-  "message": "Photo not found",
-  "errors": null
-}
-```
-
-**Not Found Response (404) - Appraisal:**
-```json
-{
-  "success": false,
-  "message": "Appraisal request not found",
-  "errors": null
-}
-```
-
-**Error Response (403) - Already Submitted:**
-```json
-{
-  "success": false,
-  "message": "Cannot delete photos from submitted appraisal",
-  "errors": null
-}
-```
-
----
-
-### 8. Submit Appraisal for Review
+### 6. Submit Appraisal for Review
 **Endpoint:** `POST /appraisals/{id}/submit`
 **Auth Required:** Yes
 

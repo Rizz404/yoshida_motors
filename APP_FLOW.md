@@ -121,8 +121,7 @@
 ### Logic
 - Validate all required fields (except Notes)
 - Save data to local state via Provider or Riverpod
-- On next → POST to `/api/appraisals` to create a draft → store the returned `appraisalId`
-- Navigate to `photo_category_screen` passing the `appraisalId`
+- On next → Navigate to `photo_category_screen` passing the vehicle info data
 
 ### Navigation
 `vehicle_info_screen` → `photo_category_screen`
@@ -152,6 +151,8 @@
 - Store photo state per category in Provider/Riverpod or a local Map
 - Count completed categories to determine button state
 - On return from `camera_capture_screen`, refresh the status of the relevant category
+- On "Continue to Summary" → POST to `/api/appraisals` to create a draft with vehicle info and all photos → store the returned `appraisalId`
+- Navigate to `summary_screen` passing the `appraisalId`
 
 ### Navigation
 `photo_category_screen` <-> `camera_capture_screen`, then → `summary_screen`
@@ -174,9 +175,7 @@
 - Two buttons at the bottom:
   - "Retake" — white outlined button
   - "Use This Photo" — background `primary600`, white text
-- On "Use This Photo" → upload photo to cloud storage via `/api/photos/upload` with `appraisalId` and category name
-- Show loading indicator with color `primary500` during upload
-- On upload success → return to `photo_category_screen` with updated category status
+- On "Use This Photo" → save photo locally and return to `photo_category_screen` with updated category status
 
 ### Logic
 - Use the `camera` package for camera access

@@ -10,6 +10,7 @@ use App\Services\FcmService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -103,23 +104,49 @@ class AppraisalRequestController extends Controller
             'description'      => 'nullable|string',
             'license_plate'    => 'nullable|string|max:20',
             'mileage'          => 'nullable|integer|min:0',
+            'photos'           => 'nullable|array',
+            'photos.*'         => 'image|mimes:jpeg,png,jpg|max:5120',
+            'photo_labels'     => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
             return $this->validationErrorResponse($validator->errors());
         }
 
-        $appraisal = $request->user()->appraisalRequests()->create([
-            'vehicle_brand'    => $request->vehicle_brand,
-            'vehicle_model'    => $request->vehicle_model,
-            'year_manufacture' => $request->year_manufacture,
-            'description'      => $request->description,
-            'license_plate'    => $request->license_plate,
-            'mileage'          => $request->mileage,
-            'status'           => 'draft',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        return $this->successResponse($appraisal, 'Appraisal request created successfully', 201);
+            $appraisal = $request->user()->appraisalRequests()->create([
+                'vehicle_brand'    => $request->vehicle_brand,
+                'vehicle_model'    => $request->vehicle_model,
+                'year_manufacture' => $request->year_manufacture,
+                'description'      => $request->description,
+                'license_plate'    => $request->license_plate,
+                'mileage'          => $request->mileage,
+                'status'           => 'draft',
+            ]);
+
+            if ($request->hasFile('photos')) {
+                foreach ($request->file('photos') as $index => $photo) {
+                    $path = $photo->store('appraisal_photos/' . $appraisal->id, 'public');
+                    $label = $request->photo_labels[$index] ?? 'Photo ' . ($index + 1);
+
+                    $appraisal->photos()->create([
+                        'category_name' => $label,
+                        'image_path'    => $path,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $appraisal->load('photos');
+
+            return $this->successResponse($appraisal, 'Appraisal request created successfully', 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse('Failed to create appraisal request: ' . $e->getMessage(), null, 500);
+        }
     }
 
     /**
@@ -160,76 +187,51 @@ class AppraisalRequestController extends Controller
             'description'      => 'nullable|string',
             'license_plate'    => 'nullable|string|max:20',
             'mileage'          => 'nullable|integer|min:0',
+            'new_photos'       => 'nullable|array',
+            'new_photos.*'     => 'image|mimes:jpeg,png,jpg|max:5120',
+            'new_photo_labels' => 'nullable|array',
+            'delete_photos'    => 'nullable|array',
+            'delete_photos.*'  => 'exists:appraisal_photos,id',
         ]);
 
         if ($validator->fails()) {
             return $this->validationErrorResponse($validator->errors());
         }
 
-        $appraisal->update($request->only(['vehicle_brand', 'vehicle_model', 'year_manufacture', 'description', 'license_plate', 'mileage']));
+        try {
+            DB::beginTransaction();
 
-        return $this->successResponse($appraisal, 'Appraisal request updated successfully');
-    }
+            $appraisal->update($request->only(['vehicle_brand', 'vehicle_model', 'year_manufacture', 'description', 'license_plate', 'mileage']));
 
-    /**
-     * Upload photo for appraisal
-     */
-    public function uploadPhoto(Request $request, $id)
-    {
-        $appraisal = $request->user()->appraisalRequests()->find($id);
+            if (!empty($request->delete_photos)) {
+                $photosToDelete = $appraisal->photos()->whereIn('id', $request->delete_photos)->get();
+                foreach ($photosToDelete as $photo) {
+                    Storage::disk('public')->delete($photo->image_path);
+                    $photo->delete();
+                }
+            }
 
-        if (!$appraisal) {
-            return $this->notFoundResponse('Appraisal request not found');
+            if ($request->hasFile('new_photos')) {
+                foreach ($request->file('new_photos') as $index => $photo) {
+                    $path = $photo->store('appraisal_photos/' . $appraisal->id, 'public');
+                    $label = $request->new_photo_labels[$index] ?? 'Photo ' . ($index + 1);
+
+                    $appraisal->photos()->create([
+                        'category_name' => $label,
+                        'image_path'    => $path,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $appraisal->load('photos');
+
+            return $this->successResponse($appraisal, 'Appraisal request updated successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse('Failed to update appraisal request: ' . $e->getMessage(), null, 500);
         }
-
-        if ($appraisal->status !== 'draft') {
-            return $this->errorResponse('Cannot upload photos to submitted appraisal', null, 403);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'category_name' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:5120',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationErrorResponse($validator->errors());
-        }
-
-        $imagePath = $request->file('image')->store('appraisal_photos/' . $appraisal->id, 'public');
-
-        $photo = $appraisal->photos()->create([
-            'category_name' => $request->category_name,
-            'image_path' => $imagePath,
-        ]);
-
-        return $this->successResponse($photo, 'Photo uploaded successfully', 201);
-    }
-
-    /**
-     * Delete photo from appraisal
-     */
-    public function deletePhoto(Request $request, $appraisalId, $photoId)
-    {
-        $appraisal = $request->user()->appraisalRequests()->find($appraisalId);
-
-        if (!$appraisal) {
-            return $this->notFoundResponse('Appraisal request not found');
-        }
-
-        if ($appraisal->status !== 'draft') {
-            return $this->errorResponse('Cannot delete photos from submitted appraisal', null, 403);
-        }
-
-        $photo = $appraisal->photos()->find($photoId);
-
-        if (!$photo) {
-            return $this->notFoundResponse('Photo not found');
-        }
-
-        Storage::disk('public')->delete($photo->image_path);
-        $photo->delete();
-
-        return $this->successResponse(null, 'Photo deleted successfully');
     }
 
     /**
