@@ -85,26 +85,47 @@
                         @endif
 
                         {{-- Upload New Photos --}}
-                        <div class="border-t border-neutral-100 pt-4">
+                        <div class="border-t border-neutral-100 pt-4" x-data="{
+                            photos: [],
+                            handleFiles(event) {
+                                const files = Array.from(event.target.files);
+                                if (files.length > 7) {
+                                    alert('Maximum 7 photos at once.');
+                                    event.target.value = '';
+                                    this.photos = [];
+                                    return;
+                                }
+                                this.photos = files.map(f => ({
+                                    name: f.name,
+                                    preview: URL.createObjectURL(f)
+                                }));
+                            }
+                        }">
                             <h4 class="text-sm font-bold text-neutral-700 mb-3">Add New Photos</h4>
-                            <div class="space-y-4">
-                                {{-- Slot 1 --}}
-                                <div class="flex flex-col md:flex-row gap-3">
-                                    <div class="md:w-1/3">
-                                        <x-forms.input name="new_photo_labels[]" placeholder="Label (e.g. Engine)" />
-                                    </div>
-                                    <div class="md:w-2/3">
-                                        <x-forms.input type="file" name="new_photos[]" accept="image/*" />
-                                    </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-neutral-700 mb-1">Select Photos</label>
+                                    <input type="file" name="new_photos[]" accept="image/jpeg,image/png,image/jpg"
+                                        multiple @change="handleFiles"
+                                        class="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer border border-neutral-300 rounded-lg p-2 bg-white" />
+                                    <p class="text-xs text-neutral-400 mt-1">Select up to 7 photos at once. Each up to
+                                        2MB.</p>
                                 </div>
-                                {{-- Slot 2 --}}
-                                <div class="flex flex-col md:flex-row gap-3">
-                                    <div class="md:w-1/3">
-                                        <x-forms.input name="new_photo_labels[]" placeholder="Label" />
-                                    </div>
-                                    <div class="md:w-2/3">
-                                        <x-forms.input type="file" name="new_photos[]" accept="image/*" />
-                                    </div>
+
+                                {{-- New Photo Preview Grid --}}
+                                <div x-show="photos.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <template x-for="(photo, index) in photos" :key="index">
+                                        <div
+                                            class="flex flex-col gap-2 p-3 bg-neutral-50 border border-neutral-200 rounded-lg">
+                                            <img :src="photo.preview" :alt="photo.name"
+                                                class="w-full h-28 object-cover rounded bg-neutral-100" />
+                                            <input type="text" name="new_photo_labels[]"
+                                                placeholder="Label (e.g. Engine)"
+                                                class="w-full text-sm border border-neutral-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                                            <span x-text="photo.name" class="text-xs text-neutral-400 truncate"
+                                                :title="photo.name"></span>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>

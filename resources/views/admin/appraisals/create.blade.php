@@ -59,35 +59,47 @@
                 </div>
 
                 {{-- SECTION 2: PHOTOS --}}
-                <div class="space-y-6">
+                <div class="space-y-6" x-data="{
+                    photos: [],
+                    handleFiles(event) {
+                        const files = Array.from(event.target.files);
+                        if (files.length > 7) {
+                            alert('Maximum 7 photos at once.');
+                            event.target.value = '';
+                            this.photos = [];
+                            return;
+                        }
+                        this.photos = files.map(f => ({
+                            name: f.name,
+                            preview: URL.createObjectURL(f)
+                        }));
+                    }
+                }">
                     <h3 class="text-lg font-semibold text-neutral-900 border-b pb-2">Vehicle Photos</h3>
-                    <p class="text-sm text-neutral-500 -mt-4">Upload up to 3 initial photos. Supported formats: JPG,
-                        PNG.</p>
+                    <p class="text-sm text-neutral-500 -mt-4">Select up to 7 photos at once, then label each one.
+                        Supported formats: JPG, PNG. Max 2MB per photo.</p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {{-- Photo Slot 1 --}}
-                        <div class="p-4 bg-neutral-50 rounded border border-neutral-200">
-                            <h4 class="text-sm font-bold text-neutral-700 mb-3">Photo #1</h4>
-                            <x-forms.input name="photo_labels[]" label="Label" placeholder="e.g. Front View"
-                                class="mb-3" />
-                            <x-forms.input type="file" name="photos[]" accept="image/*" />
-                        </div>
+                    {{-- Multiple File Input --}}
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-2">Select Photos</label>
+                        <input type="file" name="photos[]" accept="image/jpeg,image/png,image/jpg" multiple
+                            @change="handleFiles"
+                            class="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer border border-neutral-300 rounded-lg p-2 bg-white" />
+                        <p class="text-xs text-neutral-400 mt-1">Maximum 7 photos.</p>
+                    </div>
 
-                        {{-- Photo Slot 2 --}}
-                        <div class="p-4 bg-neutral-50 rounded border border-neutral-200">
-                            <h4 class="text-sm font-bold text-neutral-700 mb-3">Photo #2</h4>
-                            <x-forms.input name="photo_labels[]" label="Label" placeholder="e.g. Side View"
-                                class="mb-3" />
-                            <x-forms.input type="file" name="photos[]" accept="image/*" />
-                        </div>
-
-                        {{-- Photo Slot 3 --}}
-                        <div class="p-4 bg-neutral-50 rounded border border-neutral-200">
-                            <h4 class="text-sm font-bold text-neutral-700 mb-3">Photo #3</h4>
-                            <x-forms.input name="photo_labels[]" label="Label" placeholder="e.g. Interior"
-                                class="mb-3" />
-                            <x-forms.input type="file" name="photos[]" accept="image/*" />
-                        </div>
+                    {{-- Photo Preview Grid --}}
+                    <div x-show="photos.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <template x-for="(photo, index) in photos" :key="index">
+                            <div class="flex flex-col gap-2 p-3 bg-neutral-50 border border-neutral-200 rounded-lg">
+                                <img :src="photo.preview" :alt="photo.name"
+                                    class="w-full h-28 object-cover rounded bg-neutral-100" />
+                                <input type="text" name="photo_labels[]" placeholder="Label (e.g. Front View)"
+                                    class="w-full text-sm border border-neutral-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                                <span x-text="photo.name" class="text-xs text-neutral-400 truncate"
+                                    :title="photo.name"></span>
+                            </div>
+                        </template>
                     </div>
                 </div>
 
