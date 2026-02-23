@@ -32,6 +32,12 @@
                     'icon' => 'clipboard-document-check', // Uses heroicon-o-clipboard-document-check
                 ],
                 [
+                    'label' => 'Notifications',
+                    'route' => route('notifications.index'),
+                    'active' => request()->routeIs('notifications.*'),
+                    'icon' => 'bell', // Uses heroicon-o-bell
+                ],
+                [
                     'label' => 'User Management',
                     'route' => route('users.index'),
                     'active' => request()->routeIs('users.*'),
