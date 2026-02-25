@@ -20,7 +20,9 @@ class AppraisalRequestController extends Controller
     public function index()
     {
         // Kita load relasi user & photos biar nggak N+1 query ya Kak [web:1]
+        // Sembunyikan status 'draft' karena masih dikerjakan oleh user dan belum dikirim
         $requests = AppraisalRequest::with(['user', 'photos'])
+            ->where('status', '!=', 'draft')
             ->latest()
             ->paginate(10);
 
