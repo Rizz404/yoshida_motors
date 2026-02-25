@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
@@ -31,10 +32,17 @@ class UserController extends Controller
             'password' => 'required|string|confirmed',
             'role' => 'required|in:user,admin',
             'address' => 'nullable|string',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
             $validated['password'] = Hash::make($validated['password']);
+
+            // Handle profile photo upload
+            if ($request->hasFile('profile_photo')) {
+                $validated['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
+            }
+
             User::create($validated);
 
             return redirect()->route('users.index')->with('notify', [
@@ -74,6 +82,7 @@ class UserController extends Controller
             'role' => 'required|in:user,admin',
             'address' => 'nullable|string',
             'password' => 'nullable|string|confirmed',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
@@ -81,6 +90,16 @@ class UserController extends Controller
                 $validated['password'] = Hash::make($validated['password']);
             } else {
                 unset($validated['password']);
+            }
+
+            // Handle profile photo upload
+            if ($request->hasFile('profile_photo')) {
+                // Delete old photo if exists
+                if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+                    Storage::disk('public')->delete($user->profile_photo);
+                }
+
+                $validated['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
             }
 
             $user->update($validated);
@@ -110,6 +129,11 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
+            // Delete profile photo if exists
+            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+
             $user->delete();
 
             return redirect()->route('users.index')->with('notify', [

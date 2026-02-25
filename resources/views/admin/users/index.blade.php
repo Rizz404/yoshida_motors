@@ -24,7 +24,7 @@
                     <tr>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Name</th>
+                            User</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             Contact</th>
@@ -43,7 +43,26 @@
                     @forelse($users as $user)
                         <tr class="hover:bg-neutral-50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-neutral-900">{{ $user->name ?? 'No Name' }}</div>
+                                <div class="flex items-center">
+                                    <div class="shrink-0 h-10 w-10">
+                                        @if ($user->profile_photo)
+                                            <img class="h-10 w-10 rounded-full object-cover"
+                                                src="{{ asset('storage/' . $user->profile_photo) }}"
+                                                alt="{{ $user->name }}">
+                                        @else
+                                            <div
+                                                class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                                <span class="text-primary-600 font-semibold text-sm">
+                                                    {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-neutral-900">{{ $user->name ?? 'No Name' }}
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-neutral-900">{{ $user->email }}</div>

@@ -8,6 +8,7 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Auth as FirebaseAuth;
@@ -68,6 +69,7 @@ class AuthController extends Controller
             'email' => 'nullable|email|unique:users,email',
             'address' => 'nullable|string',
             'fcm_token' => 'nullable|string',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -87,6 +89,12 @@ class AuthController extends Controller
                 return $this->errorResponse('User already registered. Please login instead.', null, 409);
             }
 
+            // Handle profile photo upload
+            $profilePhotoPath = null;
+            if ($request->hasFile('profile_photo')) {
+                $profilePhotoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+            }
+
             // Create new user
             $user = User::create([
                 'firebase_uid' => $firebaseUid,
@@ -95,6 +103,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'address' => $request->address,
                 'fcm_token' => $request->fcm_token,
+                'profile_photo' => $profilePhotoPath,
                 'role' => 'user',
             ]);
 
@@ -271,6 +280,7 @@ class AuthController extends Controller
             'phone_number' => 'nullable|string|unique:users,phone_number',
             'address'      => 'nullable|string',
             'fcm_token'    => 'nullable|string',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -297,6 +307,12 @@ class AuthController extends Controller
                 return $this->errorResponse('User already registered. Please login instead.', null, 409);
             }
 
+            // Handle profile photo upload
+            $profilePhotoPath = null;
+            if ($request->hasFile('profile_photo')) {
+                $profilePhotoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+            }
+
             // Create new user
             $user = User::create([
                 'firebase_uid' => $firebaseUid,
@@ -305,6 +321,7 @@ class AuthController extends Controller
                 'phone_number' => $request->phone_number,
                 'address'      => $request->address,
                 'fcm_token'    => $request->fcm_token,
+                'profile_photo' => $profilePhotoPath,
                 'role'         => 'user',
             ]);
 
@@ -457,6 +474,7 @@ class AuthController extends Controller
             'email' => 'nullable|email|unique:users,email,' . $request->user()->id,
             'address' => 'nullable|string',
             'fcm_token' => 'nullable|string',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -464,6 +482,18 @@ class AuthController extends Controller
         }
 
         $user = $request->user();
+
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old photo if exists
+            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+
+            $profilePhotoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+            $user->profile_photo = $profilePhotoPath;
+        }
+
         $user->update($request->only(['name', 'email', 'address', 'fcm_token']));
 
         return $this->successResponse($user, 'Profile updated successfully');
