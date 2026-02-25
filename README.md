@@ -218,5 +218,3 @@ composer run test
 ## License
 
 Proprietary — Yoshida Motors. All rights reserved.
-
-ss
