@@ -80,7 +80,8 @@
 **Purpose:** Main dashboard. Central navigation hub for the user.
 
 ### UI Components
-- Custom AppBar: logo on the left, user name on the right, background `primary700`
+- Custom AppBar: logo on the left, user name and notification bell icon on the right, background `primary700`
+  - Notification bell icon shows a red dot badge if there are unread notifications
 - Greeting banner — "Hello, [Name]! Ready for your appraisal?", gradient background `primary600` → `primary900`
 - Active Status Card (if an appraisal is in progress):
   - Status badge colors:
@@ -96,9 +97,10 @@
 - On load → GET `/api/appraisals/latest` to check for an active appraisal
 - Show status card if exists, hide if not
 - Tap "Start New Appraisal" → navigate to `vehicle_info_screen`
+- Tap Notification Bell → navigate to `notification_screen`
 
 ### Navigation
-`home_screen` → `vehicle_info_screen`
+`home_screen` → `vehicle_info_screen` or `notification_screen`
 
 ---
 
@@ -241,3 +243,31 @@
 
 ### Navigation
 Endpoint screen — no further navigation (other than back button to `home_screen`)
+
+---
+
+## Screen 10 — `notification_screen.dart`
+
+**Purpose:** Display a list of notifications to the user.
+
+### UI Components
+- AppBar: title "Notifications", background `primary700`, back button to `home_screen`
+- "Mark all as read" text button in the AppBar actions
+- List of notifications using `ListView.builder`
+  - Unread notifications have a slightly different background color (e.g., `primary50`) and a bold title
+  - Read notifications have a white background (`background`) and normal text weight
+  - Each item shows:
+    - Icon based on notification type (e.g., info, success, warning)
+    - Title text
+    - Body text (max 2 lines, truncated)
+    - Timestamp (e.g., "2 hours ago")
+- Empty state view if there are no notifications: illustration and text "No notifications yet"
+
+### Logic
+- On load → GET `/api/notifications` to fetch the list of notifications (supports pagination)
+- On tap "Mark all as read" → PUT `/api/notifications/mark-all-read` and refresh the list
+- On tap a specific unread notification → PUT `/api/notifications/{id}/mark-read`
+- If the notification contains an `appraisal_id` in its data payload, tapping it navigates to `appraisal_result_screen` for that specific appraisal
+
+### Navigation
+`notification_screen` → `appraisal_result_screen` (if applicable) or back to `home_screen`

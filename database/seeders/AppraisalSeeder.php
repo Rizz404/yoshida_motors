@@ -20,8 +20,6 @@ class AppraisalSeeder extends Seeder
 
         $users = User::all();
 
-        // Kita loop manual aja biar aman dan gak error 'recycle' kalau versinya gak pas
-        // Atau pakai cara Kakak tadi, tapi tambahin backslash di rand()
 
         AppraisalRequest::factory(20)
             ->recycle($users)

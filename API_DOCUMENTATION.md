@@ -1152,7 +1152,105 @@ formData.append('delete_photos[]', '11');
 
 ---
 
-## 📋 Standard Response Format
+## � Notification Endpoints
+
+### 1. Get All Notifications (with Pagination)
+**Endpoint:** `GET /notifications`
+**Auth Required:** Yes
+
+**Query Parameters:**
+```
+per_page        : integer (optional) - Items per page (default: 15)
+cursor          : string (optional) - Cursor for pagination
+```
+
+**Success Response (200) - Cursor Pagination:**
+```json
+{
+  "success": true,
+  "message": "Notifications retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "title": "Appraisal Submitted",
+      "body": "Your appraisal request for Honda Jazz RS CVT has been submitted.",
+      "data": {
+        "appraisal_id": 5,
+        "status": "submitted"
+      },
+      "is_read": false,
+      "created_at": "2026-02-09T17:00:00.000000Z",
+      "updated_at": "2026-02-09T17:00:00.000000Z"
+    }
+  ],
+  "meta": {
+    "per_page": 15,
+    "next_cursor": "eyJpZCI6MSwiX3BvaW50c1RvTmV4dEl0ZW1zIjp0cnVlfQ",
+    "prev_cursor": null,
+    "has_more": false
+  }
+}
+```
+
+---
+
+### 2. Mark Notification as Read
+**Endpoint:** `PUT /notifications/{id}/mark-read`
+**Auth Required:** Yes
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Notification marked as read",
+  "data": {
+    "id": 1,
+    "user_id": 1,
+    "title": "Appraisal Submitted",
+    "body": "Your appraisal request for Honda Jazz RS CVT has been submitted.",
+    "data": {
+      "appraisal_id": 5,
+      "status": "submitted"
+    },
+    "is_read": true,
+    "created_at": "2026-02-09T17:00:00.000000Z",
+    "updated_at": "2026-02-09T17:05:00.000000Z"
+  }
+}
+```
+
+**Not Found Response (404):**
+```json
+{
+  "success": false,
+  "message": "Notification not found",
+  "errors": null
+}
+```
+
+---
+
+### 3. Mark All Notifications as Read
+**Endpoint:** `PUT /notifications/mark-all-read`
+**Auth Required:** Yes
+
+**Request:** No body required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "All notifications marked as read",
+  "data": null
+}
+```
+
+---
+
+## �📋 Standard Response Format
 
 Semua response mengikuti format standar dari `ApiResponseTrait`:
 
