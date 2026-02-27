@@ -36,7 +36,7 @@ class AppraisalRequestFactory extends Factory
 
             // Logic: Kalau completed, harus ada harganya dong~
             'final_price' => $status === 'completed'
-                ? fake()->numberBetween(150, 500) * 1000000 // 150jt - 500jt
+                ? fake()->numberBetween(150, 500) * 10000 // 150万円 - 500万円
                 : null,
 
             'admin_note' => ($status === 'completed' || $status === 'under_review')

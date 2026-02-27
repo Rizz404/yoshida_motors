@@ -49,12 +49,12 @@
             <div class="flex items-center">
                 {{-- Pake Primary (Blue) lagi karena Green ga ada di palette --}}
                 <div class="p-3 bg-primary-100 rounded-full text-primary-600">
-                    <x-heroicon-o-currency-dollar class="w-8 h-8" />
+                    <x-heroicon-o-currency-yen class="w-8 h-8" />
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-neutral-500">Total Appraised</p>
                     {{-- Format uang biar cantik --}}
-                    <p class="text-2xl font-bold text-neutral-800">${{ number_format($totalValue) }}</p>
+                    <p class="text-2xl font-bold text-neutral-800">¥{{ number_format($totalValue) }}</p>
                 </div>
             </div>
         </div>

@@ -154,7 +154,7 @@
 
                             {{-- Final Price --}}
                             <div>
-                                <x-forms.input type="number" name="final_price" label="Final Price ($)"
+                                <x-forms.input type="number" name="final_price" label="Final Price (¥)"
                                     :value="$appraisal->final_price" placeholder="0" step="1000" />
                             </div>
 
