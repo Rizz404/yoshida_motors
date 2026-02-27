@@ -1,11 +1,11 @@
-<x-layouts.admin title="User Management">
+<x-layouts.admin :title="__('users.page_title')">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-neutral-800">Users List</h1>
+        <h1 class="text-2xl font-bold text-neutral-800">{{ __('users.heading') }}</h1>
         <a href="{{ route('users.create') }}">
             <x-forms.button variant="primary">
                 <span class="flex items-center">
                     <x-heroicon-o-plus class="w-5 h-5 mr-1" />
-                    Add New User
+                    {{ __('users.add_new_user') }}
                 </span>
             </x-forms.button>
         </a>
@@ -24,19 +24,19 @@
                     <tr>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            User</th>
+                            {{ __('users.user') }}</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Contact</th>
+                            {{ __('users.contact') }}</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Role</th>
+                            {{ __('users.role') }}</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Joined Date</th>
+                            {{ __('users.joined_date') }}</th>
                         <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Actions</th>
+                            {{ __('common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-neutral-200">
@@ -59,7 +59,8 @@
                                         @endif
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-neutral-900">{{ $user->name ?? 'No Name' }}
+                                        <div class="text-sm font-medium text-neutral-900">
+                                            {{ $user->name ?? __('users.no_name') }}
                                         </div>
                                     </div>
                                 </div>
@@ -80,21 +81,21 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 <a href="{{ route('users.edit', $user) }}"
-                                    class="text-primary-600 hover:text-primary-900 font-semibold">Edit</a>
+                                    class="text-primary-600 hover:text-primary-900 font-semibold">{{ __('common.edit') }}</a>
 
                                 <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline-block"
-                                    onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    onsubmit="return confirm('{{ __('users.delete_confirm') }}');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                        class="text-secondary-600 hover:text-secondary-900 font-semibold">Delete</button>
+                                        class="text-secondary-600 hover:text-secondary-900 font-semibold">{{ __('common.delete') }}</button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-4 text-center text-neutral-500">
-                                No users found.
+                                {{ __('users.no_users') }}
                             </td>
                         </tr>
                     @endforelse

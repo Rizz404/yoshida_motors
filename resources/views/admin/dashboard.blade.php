@@ -1,4 +1,4 @@
-<x-layouts.admin title="Dashboard Overview">
+<x-layouts.admin :title="__('dashboard.page_title')">
 
     {{-- Stats Grid --}}
     <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -10,7 +10,7 @@
                     <x-heroicon-o-archive-box class="w-8 h-8" />
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-neutral-500">Total Vehicles</p>
+                    <p class="text-sm font-medium text-neutral-500">{{ __('dashboard.total_vehicles') }}</p>
                     <p class="text-2xl font-bold text-neutral-800">{{ number_format($totalVehicles) }}</p>
                 </div>
             </div>
@@ -24,7 +24,7 @@
                     <x-heroicon-o-clock class="w-8 h-8" />
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-neutral-500">Pending Reviews</p>
+                    <p class="text-sm font-medium text-neutral-500">{{ __('dashboard.pending_reviews') }}</p>
                     <p class="text-2xl font-bold text-neutral-800">{{ number_format($pendingReviews) }}</p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                     <x-heroicon-o-document-magnifying-glass class="w-8 h-8" />
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-neutral-500">Under Review</p>
+                    <p class="text-sm font-medium text-neutral-500">{{ __('dashboard.under_review') }}</p>
                     <p class="text-2xl font-bold text-neutral-800">{{ number_format($underReview) }}</p>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     <x-heroicon-o-currency-yen class="w-8 h-8" />
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-neutral-500">Total Appraised</p>
+                    <p class="text-sm font-medium text-neutral-500">{{ __('dashboard.total_appraised') }}</p>
                     {{-- Format uang biar cantik --}}
                     <p class="text-2xl font-bold text-neutral-800">¥{{ number_format($totalValue) }}</p>
                 </div>
@@ -63,10 +63,10 @@
     {{-- Recent Table Section --}}
     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-200 flex justify-between items-center bg-neutral-50">
-            <h3 class="text-lg font-semibold text-neutral-800">Recent Vehicle Submissions</h3>
+            <h3 class="text-lg font-semibold text-neutral-800">{{ __('dashboard.recent_submissions') }}</h3>
             <a href="{{ route('appraisals.index') }}"
                 class="text-sm font-medium text-primary-600 hover:text-primary-800 hover:underline">
-                View All
+                {{ __('dashboard.view_all') }}
             </a>
         </div>
 
@@ -75,15 +75,15 @@
                 <thead class="bg-neutral-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Owner</th>
+                            {{ __('dashboard.owner') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Car Details</th>
+                            {{ __('dashboard.car_details') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Date</th>
+                            {{ __('dashboard.date') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Status</th>
+                            {{ __('dashboard.status') }}</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Action</th>
+                            {{ __('dashboard.action') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-neutral-200">
@@ -97,7 +97,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-neutral-900">
-                                            {{ $request->user->name ?? 'Unknown User' }}</div>
+                                            {{ $request->user->name ?? __('common.unknown_user') }}</div>
                                         <div class="text-sm text-neutral-500">{{ $request->user->email ?? '-' }}</div>
                                     </div>
                                 </div>
@@ -105,7 +105,8 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-neutral-900">{{ $request->vehicle_brand }}
                                     {{ $request->vehicle_model }}</div>
-                                <div class="text-sm text-neutral-500">Year: {{ $request->year_manufacture }}</div>
+                                <div class="text-sm text-neutral-500">
+                                    {{ __('dashboard.year_label', ['year' => $request->year_manufacture]) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
                                 {{ $request->created_at->format('M d, Y') }}
@@ -120,7 +121,7 @@
                                         'draft' => 'bg-neutral-100 text-neutral-800', // Gray
                                         default => 'bg-neutral-100 text-neutral-800',
                                     };
-                                    $statusLabel = ucwords(str_replace('_', ' ', $request->status));
+                                    $statusLabel = __('appraisals.status_' . str_replace('-', '_', $request->status));
                                 @endphp
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses }}">
@@ -129,15 +130,15 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <a href="{{ route('appraisals.edit', $request->id) }}"
-                                    class="text-primary-600 hover:text-primary-900 mr-3">Review</a>
+                                    class="text-primary-600 hover:text-primary-900 mr-3">{{ __('common.review') }}</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-neutral-500">
                                 <x-heroicon-o-inbox class="mx-auto h-12 w-12 text-neutral-400" />
-                                <p class="mt-2 text-sm font-medium">No appraisal requests found.</p>
-                                <p class="text-xs">Waiting for new submissions...</p>
+                                <p class="mt-2 text-sm font-medium">{{ __('dashboard.no_requests') }}</p>
+                                <p class="text-xs">{{ __('dashboard.waiting_submissions') }}</p>
                             </td>
                         </tr>
                     @endforelse

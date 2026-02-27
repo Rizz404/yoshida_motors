@@ -1,0 +1,61 @@
+<?php
+
+return [
+    // Index
+    'page_title'            => 'Appraisal Requests',
+    'heading'               => 'Appraisal Requests',
+    'new_request'           => 'New Request',
+    'photo'                 => 'Photo',
+    'vehicle_info'          => 'Vehicle Info',
+    'owner'                 => 'Owner',
+    'est_price'             => 'Est. Price',
+    'delete_confirm'        => 'Delete this appraisal request permanently?',
+    'no_requests'           => 'No appraisal requests found.',
+
+    // Create
+    'create_title'          => 'Create Appraisal Request',
+    'create_heading'        => 'New Appraisal Request',
+    'section_vehicle'       => 'Vehicle Information',
+    'customer_owner'        => 'Customer (Owner)',
+    'select_customer'       => '-- Select Customer --',
+    'brand'                 => 'Brand',
+    'model'                 => 'Model',
+    'year_of_manufacture'   => 'Year of Manufacture',
+    'vehicle_description'   => 'Vehicle Description / Condition',
+    'description_placeholder' => 'Describe scratches, modifications, or specific conditions...',
+    'initial_status'        => 'Initial Status',
+    'section_photos'        => 'Vehicle Photos',
+    'photos_hint'           => 'Select up to 7 photos at once, then label each one. Supported formats: JPG, PNG. Max 2MB per photo.',
+    'select_photos'         => 'Select Photos',
+    'max_photos'            => 'Maximum 7 photos.',
+    'max_photos_each'       => 'Select up to 7 photos at once. Each up to 2MB.',
+    'max_photos_alert'      => 'Maximum 7 photos at once.',
+    'label_placeholder'     => 'Label (e.g. Front View)',
+    'create_button'         => 'Create Request',
+
+    // Edit
+    'edit_title'            => 'Edit Appraisal',
+    'edit_heading'          => 'Edit Request #:id',
+    'vehicle_details'       => 'Vehicle Details',
+    'year'                  => 'Year',
+    'description'           => 'Description',
+    'manage_photos'         => 'Manage Photos',
+    'delete_photos_hint'    => '* Check "Delete" and save to remove photos.',
+    'no_photos'             => 'No photos uploaded yet.',
+    'add_new_photos'        => 'Add New Photos',
+    'label_placeholder_engine' => 'Label (e.g. Engine)',
+    'appraisal_result'      => 'Appraisal Result',
+    'current_status'        => 'Current Status',
+    'final_price'           => 'Final Price (¥)',
+    'price_valid_until'     => 'Price Valid Until',
+    'admin_note'            => 'Internal/Admin Notes',
+    'admin_note_placeholder' => 'Notes for user or internal team...',
+    'customer_info'         => 'Customer Info',
+    'save_changes'          => 'Save Changes',
+
+    // Status labels
+    'status_draft'          => 'Draft',
+    'status_submitted'      => 'Submitted',
+    'status_under_review'   => 'Under Review',
+    'status_completed'      => 'Completed',
+];

@@ -1,0 +1,61 @@
+<?php
+
+return [
+    // Index
+    'page_title'            => '査定申請',
+    'heading'               => '査定申請',
+    'new_request'           => '新規申請',
+    'photo'                 => '写真',
+    'vehicle_info'          => '車両情報',
+    'owner'                 => 'オーナー',
+    'est_price'             => '概算価格',
+    'delete_confirm'        => 'この査定申請を完全に削除しますか？',
+    'no_requests'           => '査定申請が見つかりません。',
+
+    // Create
+    'create_title'          => '査定申請の作成',
+    'create_heading'        => '新規査定申請',
+    'section_vehicle'       => '車両情報',
+    'customer_owner'        => 'お客様（オーナー）',
+    'select_customer'       => '-- 顧客を選択 --',
+    'brand'                 => 'ブランド',
+    'model'                 => 'モデル',
+    'year_of_manufacture'   => '製造年',
+    'vehicle_description'   => '車両説明・状態',
+    'description_placeholder' => '傷、改造、または特定の状態を説明してください...',
+    'initial_status'        => '初期ステータス',
+    'section_photos'        => '車両写真',
+    'photos_hint'           => '一度に最大7枚の写真を選択し、各写真にラベルを付けてください。対応形式：JPG、PNG。1枚あたり最大2MB。',
+    'select_photos'         => '写真を選択',
+    'max_photos'            => '最大7枚。',
+    'max_photos_each'       => '一度に最大7枚まで選択可能。1枚あたり最大2MBまで。',
+    'max_photos_alert'      => '一度に選択できる写真は最大7枚です。',
+    'label_placeholder'     => 'ラベル（例：フロントビュー）',
+    'create_button'         => '申請を作成',
+
+    // Edit
+    'edit_title'            => '査定の編集',
+    'edit_heading'          => '申請 #:id を編集',
+    'vehicle_details'       => '車両詳細',
+    'year'                  => '年式',
+    'description'           => '説明',
+    'manage_photos'         => '写真管理',
+    'delete_photos_hint'    => '* 「削除」をチェックして保存すると写真が削除されます。',
+    'no_photos'             => 'まだ写真がアップロードされていません。',
+    'add_new_photos'        => '新しい写真を追加',
+    'label_placeholder_engine' => 'ラベル（例：エンジン）',
+    'appraisal_result'      => '査定結果',
+    'current_status'        => '現在のステータス',
+    'final_price'           => '最終価格（¥）',
+    'price_valid_until'     => '価格有効期限',
+    'admin_note'            => '社内・管理者メモ',
+    'admin_note_placeholder' => 'ユーザーまたは社内チームへのメモ...',
+    'customer_info'         => '顧客情報',
+    'save_changes'          => '変更を保存',
+
+    // Status labels
+    'status_draft'          => '下書き',
+    'status_submitted'      => '申請済み',
+    'status_under_review'   => '審査中',
+    'status_completed'      => '完了',
+];

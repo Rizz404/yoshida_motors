@@ -14,34 +14,28 @@
 
             $navItems = [
                 [
-                    'label' => 'Dashboard',
+                    'label' => __('navigation.dashboard'),
                     'route' => route('dashboard'),
                     'active' => request()->routeIs('dashboard'),
-                    'icon' => 'home', // Uses heroicon-o-home
+                    'icon' => 'home',
                 ],
-                // [
-                //     'label' => 'Vehicle Listings',
-                //     'route' => '#',
-                //     'active' => false,
-                //     'icon' => 'truck', // Uses heroicon-o-truck
-                // ],
                 [
-                    'label' => 'Appraisals',
+                    'label' => __('navigation.appraisals'),
                     'route' => route('appraisals.index'),
                     'active' => request()->routeIs('appraisals.*'),
-                    'icon' => 'clipboard-document-check', // Uses heroicon-o-clipboard-document-check
+                    'icon' => 'clipboard-document-check',
                 ],
                 [
-                    'label' => 'Notifications',
+                    'label' => __('navigation.notifications'),
                     'route' => route('notifications.index'),
                     'active' => request()->routeIs('notifications.*'),
-                    'icon' => 'bell', // Uses heroicon-o-bell
+                    'icon' => 'bell',
                 ],
                 [
-                    'label' => 'User Management',
+                    'label' => __('navigation.user_management'),
                     'route' => route('users.index'),
                     'active' => request()->routeIs('users.*'),
-                    'icon' => 'users', // Uses heroicon-o-users
+                    'icon' => 'users',
                 ],
             ];
         @endphp
@@ -67,7 +61,7 @@
             <button type="submit"
                 class="flex items-center w-full px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-200 rounded-lg hover:bg-red-900/50 hover:text-red-200">
                 <x-heroicon-o-arrow-right-start-on-rectangle class="w-5 h-5 mr-3" />
-                Logout
+                {{ __('navigation.logout') }}
             </button>
         </form>
     </div>

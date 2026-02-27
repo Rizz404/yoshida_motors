@@ -1,12 +1,12 @@
-<x-layouts.admin title="Notifications">
+<x-layouts.admin :title="__('notifications.page_title')">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-neutral-800">Notifications</h1>
+        <h1 class="text-2xl font-bold text-neutral-800">{{ __('notifications.heading') }}</h1>
         <form action="{{ route('notifications.mark-all-read') }}" method="POST">
             @csrf
             <x-forms.button type="submit" variant="secondary">
                 <span class="flex items-center">
                     <x-heroicon-o-check-circle class="w-5 h-5 mr-1" />
-                    Mark All as Read
+                    {{ __('notifications.mark_all_read') }}
                 </span>
             </x-forms.button>
         </form>
@@ -28,19 +28,19 @@
                     <tr>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Status
+                            {{ __('notifications.status') }}
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Title
+                            {{ __('notifications.title_col') }}
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Date
+                            {{ __('notifications.date') }}
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                            Actions
+                            {{ __('common.actions') }}
                         </th>
                     </tr>
                 </thead>
@@ -52,12 +52,12 @@
                                 @if (!$notification->is_read)
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                                        New
+                                        {{ __('notifications.new_badge') }}
                                     </span>
                                 @else
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800">
-                                        Read
+                                        {{ __('notifications.read_badge') }}
                                     </span>
                                 @endif
                             </td>
@@ -88,7 +88,7 @@
                                             method="POST" class="inline">
                                             @csrf
                                             <button type="submit" class="text-green-600 hover:text-green-900"
-                                                title="Mark as Read">
+                                                title="{{ __('notifications.mark_as_read') }}">
                                                 <x-heroicon-o-check class="w-5 h-5" />
                                             </button>
                                         </form>
@@ -96,11 +96,11 @@
 
                                     <form action="{{ route('notifications.destroy', $notification) }}" method="POST"
                                         class="inline"
-                                        onsubmit="return confirm('Are you sure you want to delete this notification?');">
+                                        onsubmit="return confirm('{{ __('notifications.delete_confirm') }}');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-secondary-600 hover:text-secondary-900"
-                                            title="Delete">
+                                            title="{{ __('notifications.delete') }}">
                                             <x-heroicon-o-trash class="w-5 h-5" />
                                         </button>
                                     </form>
@@ -112,8 +112,9 @@
                             <td colspan="4" class="px-6 py-12 text-center text-neutral-500">
                                 <div class="flex flex-col items-center justify-center">
                                     <x-heroicon-o-bell-slash class="w-12 h-12 text-neutral-300 mb-3" />
-                                    <p class="text-lg font-medium text-neutral-900">No notifications found</p>
-                                    <p class="text-sm">You're all caught up!</p>
+                                    <p class="text-lg font-medium text-neutral-900">
+                                        {{ __('notifications.no_notifications') }}</p>
+                                    <p class="text-sm">{{ __('notifications.all_caught_up') }}</p>
                                 </div>
                             </td>
                         </tr>

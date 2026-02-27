@@ -58,8 +58,21 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
+                    {{-- Locale Switcher --}}
+                    <div class="flex items-center space-x-1 text-xs">
+                        <a href="{{ route('locale.switch', 'en') }}"
+                            class="px-2 py-1 rounded {{ app()->getLocale() === 'en' ? 'bg-primary-600 text-white font-semibold' : 'text-neutral-500 hover:text-primary-600' }}">
+                            EN
+                        </a>
+                        <span class="text-neutral-300">|</span>
+                        <a href="{{ route('locale.switch', 'ja') }}"
+                            class="px-2 py-1 rounded {{ app()->getLocale() === 'ja' ? 'bg-primary-600 text-white font-semibold' : 'text-neutral-500 hover:text-primary-600' }}">
+                            JA
+                        </a>
+                    </div>
+
                     <div class="relative flex items-center text-neutral-600">
-                        <span class="mr-2 text-sm font-medium hidden sm:block">Hi, Admin</span>
+                        <span class="mr-2 text-sm font-medium hidden sm:block">{{ __('navigation.hi_admin') }}</span>
                         <div
                             class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold border border-primary-200">
                             A

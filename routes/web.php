@@ -12,6 +12,15 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Locale Switcher
+Route::get('/locale/{locale}', function (string $locale) {
+    $supported = ['en', 'ja'];
+    if (in_array($locale, $supported)) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('locale.switch');
+
 // Guest (Yang belum login boleh masuk sini)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
