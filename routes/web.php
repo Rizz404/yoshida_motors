@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\NotificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use \App\Http\Middleware\SetLocale;
 
 // Root: redirect to default locale
 Route::get('/', fn () => redirect('/en'));
@@ -14,7 +15,7 @@ Route::get('/', fn () => redirect('/en'));
 // SetLocale middleware reads {locale}, calls App::setLocale() and URL::defaults()
 Route::prefix('{locale}')
     ->where(['locale' => 'en|ja'])
-    ->middleware(\App\Http\Middleware\SetLocale::class)
+    ->middleware(SetLocale::class)
     ->group(function () {
 
         // Redirect bare locale root to login

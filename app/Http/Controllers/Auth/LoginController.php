@@ -35,7 +35,7 @@ class LoginController extends Controller
             }
 
             // Successful Login
-            return redirect()->intended('dashboard')->with('notify', [
+            return redirect()->intended(route('dashboard'))->with('notify', [
                 'type' => 'success',
                 'title' => 'Welcome Back',
                 'message' => 'You have successfully logged in.',
@@ -56,7 +56,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('notify', [
+        return redirect()->route('login')->with('notify', [
             'type' => 'info',
             'title' => 'Signed Out',
             'message' => 'You have been logged out successfully.',
