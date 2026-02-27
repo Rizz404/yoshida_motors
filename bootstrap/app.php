@@ -12,8 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
+        // SetLocale is applied per-route-group in web.php (reads {locale} URL param)
+        // SetLocaleFromHeader is applied to all API requests (reads Accept-Language header)
+        $middleware->api(append: [
+            \App\Http\Middleware\SetLocaleFromHeader::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

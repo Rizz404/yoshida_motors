@@ -93,7 +93,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div
-                                        class="flex-shrink-0 h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-text-secondary font-bold uppercase">
+                                        class="shrink-0 h-10 w-10 rounded-full bg-surface-variant flex items-center justify-center text-text-secondary font-bold uppercase">
                                         {{ substr($request->user->name ?? '?', 0, 2) }}
                                     </div>
                                     <div class="ml-4">

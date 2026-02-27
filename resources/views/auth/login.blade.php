@@ -3,14 +3,19 @@
     <div class="min-h-screen flex items-center justify-center bg-background">
         <div class="max-w-md w-full bg-card rounded-lg shadow-md p-8 border border-border">
 
-            {{-- Locale Switcher --}}
+            {{-- Locale Switcher: swap segment[0] to target locale --}}
             <div class="flex justify-end mb-4 space-x-1 text-xs">
-                <a href="{{ route('locale.switch', 'en') }}"
+                @php
+                    $segments = request()->segments();
+                    $enUrl = url(collect($segments)->put(0, 'en')->implode('/'));
+                    $jaUrl = url(collect($segments)->put(0, 'ja')->implode('/'));
+                @endphp
+                <a href="{{ $enUrl }}"
                     class="px-2 py-1 rounded {{ app()->getLocale() === 'en' ? 'bg-primary text-text-on-primary font-semibold' : 'text-text-secondary hover:text-primary' }}">
                     EN
                 </a>
                 <span class="text-text-disabled self-center">|</span>
-                <a href="{{ route('locale.switch', 'ja') }}"
+                <a href="{{ $jaUrl }}"
                     class="px-2 py-1 rounded {{ app()->getLocale() === 'ja' ? 'bg-primary text-text-on-primary font-semibold' : 'text-text-secondary hover:text-primary' }}">
                     JA
                 </a>

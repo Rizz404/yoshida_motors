@@ -7,42 +7,41 @@ use App\Http\Controllers\Admin\NotificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 
-// Halaman Depan (Redirect ke login aja biar simpel)
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Root: redirect to default locale
+Route::get('/', fn () => redirect('/en'));
 
-// Locale Switcher
-Route::get('/locale/{locale}', function (string $locale) {
-    $supported = ['en', 'ja'];
-    if (in_array($locale, $supported)) {
-        session(['locale' => $locale]);
-    }
-    return redirect()->back();
-})->name('locale.switch');
+// Locale-prefixed routes (/{locale}/...)
+// SetLocale middleware reads {locale}, calls App::setLocale() and URL::defaults()
+Route::prefix('{locale}')
+    ->where(['locale' => 'en|ja'])
+    ->middleware(\App\Http\Middleware\SetLocale::class)
+    ->group(function () {
 
-// Guest (Yang belum login boleh masuk sini)
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-});
+        // Redirect bare locale root to login
+        Route::get('/', fn () => redirect()->route('login'));
 
-// Admin (Yang udah login & role admin)
-Route::middleware(['auth'])->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+        // Guest routes
+        Route::middleware('guest')->group(function () {
+            Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+            Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+        });
 
-    Route::resource('users', UserController::class);
-    Route::resource('appraisals', AppraisalRequestController::class);
+        // Authenticated (admin) routes
+        Route::middleware(['auth'])->group(function () {
+            Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Notifications
-    Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-        Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
-        Route::post('/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
-        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+            Route::resource('users', UserController::class);
+            Route::resource('appraisals', AppraisalRequestController::class);
+
+            // Notifications
+            Route::prefix('notifications')->name('notifications.')->group(function () {
+                Route::get('/', [NotificationController::class, 'index'])->name('index');
+                Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+                Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+                Route::post('/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+                Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::get('/dashboard', DashboardController::class)->name('dashboard');
+        });
     });
-
-    // * Karena pake invoke jadi gak usah pake array padahal bukan resource
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
-});

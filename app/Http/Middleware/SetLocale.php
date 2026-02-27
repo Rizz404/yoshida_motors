@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
@@ -17,16 +17,23 @@ class SetLocale
 
     /**
      * Handle an incoming request.
+     *
+     * Reads the {locale} segment from the URL route parameter,
+     * sets the application locale, and registers it as a URL default
+     * so all route() helper calls automatically include the locale.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = Session::get('locale', config('app.locale', 'en'));
+        $locale = $request->route('locale', 'en');
 
         if (! in_array($locale, $this->supportedLocales)) {
-            $locale = 'en';
+            abort(404);
         }
 
         App::setLocale($locale);
+
+        // Make route() helpers always inject {locale} without explicit passing.
+        URL::defaults(['locale' => $locale]);
 
         return $next($request);
     }
