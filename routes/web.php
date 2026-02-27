@@ -4,9 +4,16 @@ use App\Http\Controllers\Admin\AppraisalRequestController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Models\AppraisalRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use \App\Http\Middleware\SetLocale;
+
+// Explicit route model bindings (resolves type-error caused by 'AppraisalRequest'
+// class name conflicting with FormRequest in Laravel's implicit binding resolver)
+Route::bind('appraisal', fn ($value) => AppraisalRequest::findOrFail($value));
+Route::bind('user', fn ($value) => User::findOrFail($value));
 
 // Root: redirect to default locale
 Route::get('/', fn () => redirect('/en'));
@@ -28,7 +35,7 @@ Route::prefix('{locale}')
         });
 
         // Authenticated (admin) routes
-        Route::middleware(['auth'])->group(function () {
+        Route::middleware(['auth', \Illuminate\Routing\Middleware\SubstituteBindings::class])->group(function () {
             Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
             Route::resource('users', UserController::class);

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\AppraisalRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Explicit route model bindings to avoid ambiguity with the
+        // "AppraisalRequest" name (which Laravel may confuse with a FormRequest).
+        Route::model('appraisal', AppraisalRequest::class);
+        Route::model('user', User::class);
     }
 }
