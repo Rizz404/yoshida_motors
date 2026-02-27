@@ -5,73 +5,198 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
+/*
+ * Dark mode — use OS/system preference automatically.
+ * No need to add `.dark` on any element; colors flip via CSS variables.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * @theme inline — Tailwind reads these as design tokens but resolves
+ * the actual value from CSS custom properties at runtime, so the same
+ * utility class (e.g. `bg-background`) automatically picks up the
+ * :root override supplied by the media query below.
+ */
+@theme inline {
     /* Fonts */
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /*
-     * Primary Colors: Blue for trust and professionalism
-     * (Transferred from tailwind.config.js)
-     */
-    --color-primary-50: #eff6ff;
-    --color-primary-100: #dbeafe;
-    --color-primary-200: #bfdbfe;
-    --color-primary-300: #93c5fd;
-    --color-primary-400: #60a5fa;
-    --color-primary-500: #3b82f6;
-    --color-primary-600: #2563eb;
-    --color-primary-700: #1d4ed8;
-    --color-primary-800: #1e40af;
-    --color-primary-900: #1e3a8a;
-    --color-primary-950: #172554;
+    /* ── Surfaces ─────────────────────────────────────────────────── */
+    --color-background: var(--ym-background);
+    --color-surface: var(--ym-surface);
+    --color-surface-variant: var(--ym-surface-variant);
 
-    /*
-     * Secondary Colors: Red for energy and urgency
-     */
-    --color-secondary-50: #fef2f2;
-    --color-secondary-100: #fee2e2;
-    --color-secondary-200: #fecaca;
-    --color-secondary-300: #fca5a5;
-    --color-secondary-400: #f87171;
-    --color-secondary-500: #ef4444;
-    --color-secondary-600: #dc2626;
-    --color-secondary-700: #b91c1c;
-    --color-secondary-800: #991b1b;
-    --color-secondary-900: #7f1d1d;
-    --color-secondary-950: #450a0a;
+    /* ── Brand / Primary (Teal) ───────────────────────────────────── */
+    --color-primary: var(--ym-primary);
+    --color-primary-container: var(--ym-primary-container);
 
-    /*
-     * Accent Colors: Orange for action and vibrancy
-     */
-    --color-accent-50: #fff7ed;
-    --color-accent-100: #ffedd5;
-    --color-accent-200: #fed7aa;
-    --color-accent-300: #fdba74;
-    --color-accent-400: #fb923c;
-    --color-accent-500: #f97316;
-    --color-accent-600: #ea580c;
-    --color-accent-700: #c2410c;
-    --color-accent-800: #9a3412;
-    --color-accent-900: #7c2d12;
-    --color-accent-950: #431407;
+    /* ── Secondary (Slate) ────────────────────────────────────────── */
+    --color-secondary: var(--ym-secondary);
+    --color-secondary-container: var(--ym-secondary-container);
 
-    /*
-     * Neutral Colors: Gray for backgrounds and text
-     */
-    --color-neutral-50: #f9fafb;
-    --color-neutral-100: #f3f4f6;
-    --color-neutral-200: #e5e7eb;
-    --color-neutral-300: #d1d5db;
-    --color-neutral-400: #9ca3af;
-    --color-neutral-500: #6b7280;
-    --color-neutral-600: #4b5563;
-    --color-neutral-700: #374151;
-    --color-neutral-800: #1f2937;
-    --color-neutral-900: #111827;
-    --color-neutral-950: #030712;
+    /* ── Accent / CTA (Orange) ────────────────────────────────────── */
+    --color-accent: var(--ym-accent);
+    --color-accent-hover: var(--ym-accent-hover);
+    --color-accent-pressed: var(--ym-accent-pressed);
 
-    /* Base Colors */
-    --color-background: #ffffff;
-    --color-text: #000000;
+    /* ── Text ─────────────────────────────────────────────────────── */
+    --color-text-primary: var(--ym-text-primary);
+    --color-text-secondary: var(--ym-text-secondary);
+    --color-text-tertiary: var(--ym-text-tertiary);
+    --color-text-disabled: var(--ym-text-disabled);
+    --color-text-on-primary: var(--ym-text-on-primary);
+    --color-text-on-accent: var(--ym-text-on-accent);
+
+    /* ── Borders & Dividers ───────────────────────────────────────── */
+    --color-border: var(--ym-border);
+    --color-border-hover: var(--ym-border-hover);
+    --color-divider: var(--ym-divider);
+
+    /* ── Interactive States ───────────────────────────────────────── */
+    --color-hover: var(--ym-hover);
+    --color-pressed: var(--ym-pressed);
+    --color-focus: var(--ym-focus);
+    --color-disabled: var(--ym-disabled);
+
+    /* ── Special Surfaces ─────────────────────────────────────────── */
+    --color-card: var(--ym-card);
+    --color-modal: var(--ym-modal);
+    --color-tooltip: var(--ym-tooltip);
+
+    /* ── Navigation ───────────────────────────────────────────────── */
+    --color-nav-bar: var(--ym-nav-bar);
+    --color-nav-selected: var(--ym-nav-selected);
+    --color-nav-unselected: var(--ym-nav-unselected);
+
+    /* ── Overlays ─────────────────────────────────────────────────── */
+    --color-overlay: var(--ym-overlay);
+    --color-scrim: var(--ym-scrim);
+
+    /* ── Semantic / Status (invariant) ───────────────────────────── */
+    --color-success: #22c55e;
+    --color-success-light: #dcfce7;
+    --color-success-dark: #16a34a;
+
+    --color-warning: #fbbf24;
+    --color-warning-light: #fef9c3;
+    --color-warning-dark: #f59e0b;
+
+    --color-error: #ef4444;
+    --color-error-light: #fee2e2;
+    --color-error-dark: #dc2626;
+
+    --color-info: #3b82f6;
+    --color-info-light: #dbeafe;
+    --color-info-dark: #2563eb;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CSS Custom Properties — Light (default) & Dark (media query)
+   All Tailwind utilities resolve these at runtime → zero extra markup.
+   ══════════════════════════════════════════════════════════════════════ */
+@layer base {
+    :root {
+        /* 60% — Backgrounds & Surfaces */
+        --ym-background: #f8fafa;
+        --ym-surface: #ffffff;
+        --ym-surface-variant: #f0f9f8;
+
+        /* 30% — Teal Brand */
+        --ym-primary: #0d9488;
+        --ym-primary-container: #ccfbf1;
+        --ym-secondary: #475569;
+        --ym-secondary-container: #e2e8f0;
+
+        /* 10% — Orange Accent */
+        --ym-accent: #f97316;
+        --ym-accent-hover: #ea580c;
+        --ym-accent-pressed: #c2410c;
+
+        /* Text */
+        --ym-text-primary: #0f172a;
+        --ym-text-secondary: #475569;
+        --ym-text-tertiary: #94a3b8;
+        --ym-text-disabled: #cbd5e1;
+        --ym-text-on-primary: #ffffff;
+        --ym-text-on-accent: #ffffff;
+
+        /* Borders & Dividers */
+        --ym-border: #ccedea;
+        --ym-border-hover: #99dcd7;
+        --ym-divider: #f0fdfa;
+
+        /* Interactive States */
+        --ym-hover: #f0fdfa;
+        --ym-pressed: #ccfbf1;
+        --ym-focus: rgb(13 148 136 / 0.12);
+        --ym-disabled: #f1f5f9;
+
+        /* Special Surfaces */
+        --ym-card: #ffffff;
+        --ym-modal: #ffffff;
+        --ym-tooltip: #042f2e;
+
+        /* Navigation */
+        --ym-nav-bar: #ffffff;
+        --ym-nav-selected: #0d9488;
+        --ym-nav-unselected: #64748b;
+
+        /* Overlays */
+        --ym-overlay: rgb(0 0 0 / 0.5);
+        --ym-scrim: rgb(0 0 0 / 0.32);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            /* 60% — Deep Dark Teal Backgrounds */
+            --ym-background: #042f2e;
+            --ym-surface: #0f3d3a;
+            --ym-surface-variant: #134e4a;
+
+            /* 30% — Light Teal on Dark */
+            --ym-primary: #2dd4bf;
+            --ym-primary-container: #115e59;
+            --ym-secondary: #94a3b8;
+            --ym-secondary-container: #134e4a;
+
+            /* 10% — Orange Accent (lighter for dark bg) */
+            --ym-accent: #fb923c;
+            --ym-accent-hover: #fdba74;
+            --ym-accent-pressed: #f97316;
+
+            /* Text */
+            --ym-text-primary: #f0fdfa;
+            --ym-text-secondary: #cbd5e1;
+            --ym-text-tertiary: #94a3b8;
+            --ym-text-disabled: #334155;
+            --ym-text-on-primary: #042f2e;
+            --ym-text-on-accent: #ffffff;
+
+            /* Borders & Dividers */
+            --ym-border: #134e4a;
+            --ym-border-hover: #115e59;
+            --ym-divider: #0f3d3a;
+
+            /* Interactive States */
+            --ym-hover: rgb(45 212 191 / 0.08);
+            --ym-pressed: rgb(45 212 191 / 0.15);
+            --ym-focus: rgb(45 212 191 / 0.12);
+            --ym-disabled: #0f3d3a;
+
+            /* Special Surfaces */
+            --ym-card: #0f3d3a;
+            --ym-modal: #0f3d3a;
+            --ym-tooltip: #f0fdfa;
+
+            /* Navigation */
+            --ym-nav-bar: #0f3d3a;
+            --ym-nav-selected: #2dd4bf;
+            --ym-nav-unselected: #94a3b8;
+
+            /* Overlays */
+            --ym-overlay: rgb(0 0 0 / 0.7);
+            --ym-scrim: rgb(0 0 0 / 0.5);
+        }
+    }
 }

@@ -39,32 +39,32 @@
     get colors() {
         const colors = {
             success: {
-                bg: 'bg-primary-50',
-                border: 'border-primary-200',
-                text: 'text-primary-800',
-                icon: 'text-primary-500',
-                btn: 'hover:bg-primary-100 focus:ring-primary-500'
+                bg: 'bg-success-light',
+                border: 'border-success',
+                text: 'text-success-dark',
+                icon: 'text-success',
+                btn: 'hover:bg-success-light focus:ring-success'
             },
             error: {
-                bg: 'bg-secondary-50',
-                border: 'border-secondary-200',
-                text: 'text-secondary-800',
-                icon: 'text-secondary-500',
-                btn: 'hover:bg-secondary-100 focus:ring-secondary-500'
+                bg: 'bg-error-light',
+                border: 'border-error',
+                text: 'text-error-dark',
+                icon: 'text-error',
+                btn: 'hover:bg-error-light focus:ring-error'
             },
             warning: {
-                bg: 'bg-accent-50',
-                border: 'border-accent-200',
-                text: 'text-accent-800',
-                icon: 'text-accent-500',
-                btn: 'hover:bg-accent-100 focus:ring-accent-500'
+                bg: 'bg-warning-light',
+                border: 'border-warning',
+                text: 'text-warning-dark',
+                icon: 'text-warning',
+                btn: 'hover:bg-warning-light focus:ring-warning'
             },
             info: {
-                bg: 'bg-neutral-50',
-                border: 'border-neutral-200',
-                text: 'text-neutral-800',
-                icon: 'text-neutral-500',
-                btn: 'hover:bg-neutral-100 focus:ring-neutral-500'
+                bg: 'bg-info-light',
+                border: 'border-info',
+                text: 'text-info-dark',
+                icon: 'text-info',
+                btn: 'hover:bg-info-light focus:ring-info'
             }
         };
         return colors[this.type] || colors.info;
@@ -131,8 +131,8 @@
 
             <!-- Detail / Stack Trace Section -->
             <div x-show="showDetails && details" x-collapse
-                class="bg-white border-t border-gray-100 p-4 max-h-60 overflow-y-auto">
-                <pre class="text-xs text-neutral-600 font-mono whitespace-pre-wrap break-all" x-text="details"></pre>
+                class="bg-surface border-t border-border p-4 max-h-60 overflow-y-auto">
+                <pre class="text-xs text-text-secondary font-mono whitespace-pre-wrap break-all" x-text="details"></pre>
             </div>
         </div>
     </div>

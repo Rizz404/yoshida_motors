@@ -19,11 +19,10 @@
     $isChecked = old($name) !== null ? old($name) == $value : $checked;
 
     $baseClasses =
-        'rounded border-neutral-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 transition duration-150 ease-in-out cursor-pointer';
+        'rounded border-border text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition duration-150 ease-in-out cursor-pointer';
 
-    // Checkbox error styling (jarang dipake, tapi bagus ada)
-    $stateClasses = $resolvedError ? 'border-secondary-300 text-secondary-600 focus:ring-secondary-200' : '';
-
+    // Checkbox error styling
+    $stateClasses = $resolvedError ? 'border-error text-error focus:ring-error/20' : '';
     $classes = "$baseClasses $stateClasses";
 @endphp
 
@@ -38,18 +37,18 @@
         @if ($label)
             <div class="ml-3 text-sm">
                 <label for="{{ $id }}"
-                    class="font-medium text-neutral-700 {{ $disabled ? 'opacity-50' : '' }}">
+                    class="font-medium text-text-primary {{ $disabled ? 'opacity-50' : '' }}">
                     {{ $label }}
                 </label>
                 @if ($hint)
-                    <p class="text-neutral-500 font-normal mt-0.5">{{ $hint }}</p>
+                    <p class="text-text-secondary font-normal mt-0.5">{{ $hint }}</p>
                 @endif
             </div>
         @endif
     </div>
 
     @if ($resolvedError)
-        <p class="mt-1 text-xs text-secondary-600 font-medium ml-8">
+        <p class="mt-1 text-xs text-error font-medium ml-8">
             {{ $resolvedError }}
         </p>
     @endif

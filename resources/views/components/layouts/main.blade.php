@@ -13,7 +13,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-background font-sans antialiased">
 
     {{-- Slot utama buat konten --}}
     {{ $slot }}

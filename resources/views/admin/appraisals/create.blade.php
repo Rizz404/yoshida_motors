@@ -1,20 +1,20 @@
 <x-layouts.admin :title="__('appraisals.create_title')">
     <div class="max-w-4xl mx-auto">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold text-neutral-800">{{ __('appraisals.create_heading') }}</h1>
-            <a href="{{ route('appraisals.index') }}" class="text-sm text-neutral-600 hover:text-primary-600">
+            <h1 class="text-2xl font-bold text-text-primary">{{ __('appraisals.create_heading') }}</h1>
+            <a href="{{ route('appraisals.index') }}" class="text-sm text-text-secondary hover:text-primary">
                 &larr; {{ __('common.back_to_list') }}
             </a>
         </div>
 
-        <div class="bg-white shadow-sm rounded-lg border border-neutral-200 p-6">
+        <div class="bg-card shadow-sm rounded-lg border border-border p-6">
             {{-- Enctype multipart/form-data wajib buat upload file --}}
             <form action="{{ route('appraisals.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                 @csrf
 
                 {{-- SECTION 1: VEHICLE INFORMATION --}}
                 <div class="space-y-6">
-                    <h3 class="text-lg font-semibold text-neutral-900 border-b pb-2">
+                    <h3 class="text-lg font-semibold text-text-primary border-b pb-2">
                         {{ __('appraisals.section_vehicle') }}</h3>
 
                     {{-- User Selection --}}
@@ -78,37 +78,37 @@
                         }));
                     }
                 }">
-                    <h3 class="text-lg font-semibold text-neutral-900 border-b pb-2">
+                    <h3 class="text-lg font-semibold text-text-primary border-b pb-2">
                         {{ __('appraisals.section_photos') }}</h3>
-                    <p class="text-sm text-neutral-500 -mt-4">{{ __('appraisals.photos_hint') }}</p>
+                    <p class="text-sm text-text-secondary -mt-4">{{ __('appraisals.photos_hint') }}</p>
 
                     {{-- Multiple File Input --}}
                     <div>
                         <label
-                            class="block text-sm font-medium text-neutral-700 mb-2">{{ __('appraisals.select_photos') }}</label>
+                            class="block text-sm font-medium text-text-primary mb-2">{{ __('appraisals.select_photos') }}</label>
                         <input type="file" name="photos[]" accept="image/jpeg,image/png,image/jpg" multiple
                             @change="handleFiles"
-                            class="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer border border-neutral-300 rounded-lg p-2 bg-white" />
-                        <p class="text-xs text-neutral-400 mt-1">{{ __('appraisals.max_photos') }}</p>
+                            class="block w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-container file:text-primary hover:file:bg-primary-container/80 cursor-pointer border border-border rounded-lg p-2 bg-surface" />
+                        <p class="text-xs text-text-tertiary mt-1">{{ __('appraisals.max_photos') }}</p>
                     </div>
 
                     {{-- Photo Preview Grid --}}
                     <div x-show="photos.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <template x-for="(photo, index) in photos" :key="index">
-                            <div class="flex flex-col gap-2 p-3 bg-neutral-50 border border-neutral-200 rounded-lg">
+                            <div class="flex flex-col gap-2 p-3 bg-background border border-border rounded-lg">
                                 <img :src="photo.preview" :alt="photo.name"
-                                    class="w-full h-28 object-cover rounded bg-neutral-100" />
+                                    class="w-full h-28 object-cover rounded bg-surface-variant" />
                                 <input type="text" name="photo_labels[]"
                                     :placeholder="'{{ __('appraisals.label_placeholder') }}'"
-                                    class="w-full text-sm border border-neutral-300 rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
-                                <span x-text="photo.name" class="text-xs text-neutral-400 truncate"
+                                    class="w-full text-sm border border-border rounded px-2 py-1.5 bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+                                <span x-text="photo.name" class="text-xs text-text-tertiary truncate"
                                     :title="photo.name"></span>
                             </div>
                         </template>
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-6 border-t border-neutral-200">
+                <div class="flex justify-end pt-6 border-t border-border">
                     <x-forms.button type="submit" variant="primary">
                         {{ __('appraisals.create_button') }}
                     </x-forms.button>

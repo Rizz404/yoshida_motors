@@ -1,6 +1,6 @@
 <x-layouts.main :title="$title ?? 'Admin Panel'">
 
-    <div class="flex h-screen bg-neutral-50 overflow-hidden" x-data="{ sidebarOpen: false }">
+    <div class="flex h-screen bg-background overflow-hidden" x-data="{ sidebarOpen: false }">
 
         {{-- ================= MOBILE SIDEBAR (Off-Canvas) ================= --}}
         <div x-show="sidebarOpen" class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
@@ -8,7 +8,7 @@
             <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0" class="fixed inset-0 bg-neutral-900/80" @click="sidebarOpen = false">
+                x-transition:leave-end="opacity-0" class="fixed inset-0 bg-overlay" @click="sidebarOpen = false">
             </div>
 
             {{-- Sidebar Panel Mobile --}}
@@ -19,7 +19,7 @@
                 class="fixed inset-0 flex">
 
                 {{-- Sidebar Component --}}
-                <div class="relative w-full max-w-xs flex-1 bg-primary-900">
+                <div class="relative w-full max-w-xs flex-1 bg-[#0f3d3a]">
                     <x-layouts.admin-sidebar />
 
                     {{-- Close Button --}}
@@ -45,14 +45,14 @@
 
             {{-- Top Header --}}
             <header
-                class="flex items-center justify-between h-16 px-6 py-4 bg-white border-b border-neutral-200 shadow-sm shrink-0">
+                class="flex items-center justify-between h-16 px-6 py-4 bg-surface border-b border-border shadow-sm shrink-0">
                 <div class="flex items-center">
                     {{-- Hamburger Button (Mobile Only) --}}
                     <button @click="sidebarOpen = true"
-                        class="text-neutral-500 focus:outline-none lg:hidden hover:text-primary-600 p-2 -ml-2">
+                        class="text-text-secondary focus:outline-none lg:hidden hover:text-primary p-2 -ml-2">
                         <x-heroicon-o-bars-3 class="w-6 h-6" />
                     </button>
-                    <h2 class="ml-4 text-lg font-semibold text-neutral-800 lg:ml-0">
+                    <h2 class="ml-4 text-lg font-semibold text-text-primary lg:ml-0">
                         {{ $title ?? 'Dashboard' }}
                     </h2>
                 </div>
@@ -61,20 +61,20 @@
                     {{-- Locale Switcher --}}
                     <div class="flex items-center space-x-1 text-xs">
                         <a href="{{ route('locale.switch', 'en') }}"
-                            class="px-2 py-1 rounded {{ app()->getLocale() === 'en' ? 'bg-primary-600 text-white font-semibold' : 'text-neutral-500 hover:text-primary-600' }}">
+                            class="px-2 py-1 rounded {{ app()->getLocale() === 'en' ? 'bg-primary text-text-on-primary font-semibold' : 'text-text-secondary hover:text-primary' }}">
                             EN
                         </a>
-                        <span class="text-neutral-300">|</span>
+                        <span class="text-text-disabled">|</span>
                         <a href="{{ route('locale.switch', 'ja') }}"
-                            class="px-2 py-1 rounded {{ app()->getLocale() === 'ja' ? 'bg-primary-600 text-white font-semibold' : 'text-neutral-500 hover:text-primary-600' }}">
+                            class="px-2 py-1 rounded {{ app()->getLocale() === 'ja' ? 'bg-primary text-text-on-primary font-semibold' : 'text-text-secondary hover:text-primary' }}">
                             JA
                         </a>
                     </div>
 
-                    <div class="relative flex items-center text-neutral-600">
+                    <div class="relative flex items-center text-text-secondary">
                         <span class="mr-2 text-sm font-medium hidden sm:block">{{ __('navigation.hi_admin') }}</span>
                         <div
-                            class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold border border-primary-200">
+                            class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold border border-primary/20">
                             A
                         </div>
                     </div>
@@ -82,7 +82,7 @@
             </header>
 
             {{-- Main Scrollable Content --}}
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-neutral-50 p-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
                 {{ $slot }}
             </main>
         </div>
