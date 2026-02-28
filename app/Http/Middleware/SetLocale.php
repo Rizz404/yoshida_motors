@@ -35,6 +35,10 @@ class SetLocale
         // Make route() helpers always inject {locale} without explicit passing.
         URL::defaults(['locale' => $locale]);
 
+        // Remove {locale} from route parameters so it is NOT passed positionally
+        // to controller methods (which would shift arguments and break route model binding).
+        $request->route()->forgetParameter('locale');
+
         return $next($request);
     }
 }
