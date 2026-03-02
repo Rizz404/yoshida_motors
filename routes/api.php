@@ -36,7 +36,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         // Auth endpoints
         Route::prefix('auth')->name('auth.')->group(function () {
             Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
-            Route::put('/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
+            Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('update-profile');
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         });
 
@@ -46,7 +46,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('/', [AppraisalRequestController::class, 'index'])->name('index');
             Route::post('/', [AppraisalRequestController::class, 'store'])->name('store');
             Route::get('/{id}', [AppraisalRequestController::class, 'show'])->name('show')->whereNumber('id');
-            Route::put('/{id}', [AppraisalRequestController::class, 'update'])->name('update')->whereNumber('id');
+            Route::patch('/{id}', [AppraisalRequestController::class, 'update'])->name('update')->whereNumber('id');
             Route::delete('/{id}', [AppraisalRequestController::class, 'destroy'])->name('destroy')->whereNumber('id');
 
             // Submit appraisal
@@ -56,8 +56,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         // Notification endpoints
         Route::prefix('notifications')->name('notifications.')->group(function () {
             Route::get('/', [NotificationController::class, 'index'])->name('index');
-            Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-            Route::put('/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read')->whereNumber('id');
+            Route::patch('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+            Route::patch('/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read')->whereNumber('id');
         });
     });
 });
