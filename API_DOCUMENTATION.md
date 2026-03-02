@@ -650,7 +650,7 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 ---
 
 ### 8. Update User Profile
-**Endpoint:** `PUT /auth/profile`
+**Endpoint:** `PATCH /auth/profile`
 **Auth Required:** Yes
 
 **Request Body:**
@@ -978,15 +978,15 @@ formData.append('photo_labels[]', 'Tampak Belakang');
 ---
 
 ### 5. Update Appraisal Request
-**Endpoint:** `PUT /appraisals/{id}`
+**Endpoint:** `PATCH /appraisals/{id}`
 **Auth Required:** Yes
-**Content-Type:** `multipart/form-data` (Gunakan `_method=PUT` jika menggunakan form-data)
+**Content-Type:** `multipart/form-data` (Gunakan `_method=PATCH` jika menggunakan form-data)
 
 **⚠️ Important:** Hanya bisa update appraisal dengan status `draft`
 
 **Request Body (Form Data):**
 ```
-_method          : string (required if using multipart/form-data) - "PUT"
+_method          : string (required if using multipart/form-data) - "PATCH"
 vehicle_brand    : string (optional, max:255)
 vehicle_model    : string (optional, max:255)
 year_manufacture : integer (optional, min:1900, max:2027)
@@ -1001,7 +1001,7 @@ delete_photos[]  : array of integers (optional) - ID foto yang ingin dihapus
 **Example (JavaScript FormData):**
 ```javascript
 const formData = new FormData();
-formData.append('_method', 'PUT');
+formData.append('_method', 'PATCH');
 formData.append('vehicle_model', 'Jazz RS CVT');
 formData.append('description', 'Updated description with more details');
 
@@ -1212,7 +1212,7 @@ cursor          : string (optional) - Cursor for pagination
 ---
 
 ### 2. Mark Notification as Read
-**Endpoint:** `PUT /notifications/{id}/mark-read`
+**Endpoint:** `PATCH /notifications/{id}/mark-read`
 **Auth Required:** Yes
 
 **Request:** No body required
@@ -1250,7 +1250,7 @@ cursor          : string (optional) - Cursor for pagination
 ---
 
 ### 3. Mark All Notifications as Read
-**Endpoint:** `PUT /notifications/mark-all-read`
+**Endpoint:** `PATCH /notifications/mark-all-read`
 **Auth Required:** Yes
 
 **Request:** No body required

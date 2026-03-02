@@ -161,7 +161,7 @@
                             {{-- Final Price --}}
                             <div>
                                 <x-forms.input type="number" name="final_price" :label="__('appraisals.final_price')" :value="$appraisal->final_price"
-                                    placeholder="0" step="1000" />
+                                    placeholder="0" />
                             </div>
 
                             {{-- Valid Until --}}
