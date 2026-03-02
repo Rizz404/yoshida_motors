@@ -59,4 +59,28 @@ return [
     'status_under_review'   => 'Under Review',
     'status_completed'      => 'Completed',
     'status_rejected'       => 'Rejected',
+
+    // Flash messages (notify)
+    'notify_created_title'          => 'Success',
+    'notify_created_message'        => 'The appraisal request has been created successfully.',
+    'notify_create_error_title'     => 'Operation Failed',
+    'notify_create_error_message'   => 'An error occurred while creating the request. Please try again.',
+    'notify_updated_title'          => 'Success',
+    'notify_updated_message'        => 'Appraisal request has been updated successfully.',
+    'notify_update_error_title'     => 'Update Failed',
+    'notify_update_error_message'   => 'Unable to update request details due to a system error.',
+    'notify_deleted_title'          => 'Deleted',
+    'notify_deleted_message'        => 'The appraisal request has been removed from the system.',
+    'notify_delete_error_title'     => 'Deletion Failed',
+    'notify_delete_error_message'   => 'Unable to delete the request. Please check system logs.',
+
+    // FCM Push Notification
+    'fcm_created_title'             => 'New Appraisal Request',
+    'fcm_created_body'              => 'An appraisal request for your :brand :model has been created by Admin.',
+    'fcm_rejected_title'            => 'Appraisal Request Rejected',
+    'fcm_rejected_body'             => 'Your appraisal for :brand :model could not be processed.',
+    'fcm_rejected_reason'           => ' Reason: :reason',
+    'fcm_updated_title'             => 'Appraisal Update',
+    'fcm_updated_body'              => 'Your appraisal for :brand :model has been updated to :status.',
+    'fcm_updated_price'             => ' Final price: ¥:price.',
 ];

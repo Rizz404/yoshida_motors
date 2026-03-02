@@ -47,8 +47,8 @@ class UserController extends Controller
 
             return redirect()->route('users.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Success',
-                'message' => 'The user has been created successfully.',
+                'title' => __('users.notify_created_title'),
+                'message' => __('users.notify_created_message'),
             ]);
         } catch (\Exception $e) {
             Log::error('Error creating user: ' . $e->getMessage());
@@ -61,8 +61,8 @@ class UserController extends Controller
 
             return back()->withInput()->with('notify', [
                 'type' => 'error',
-                'title' => 'Operation Failed',
-                'message' => 'An error occurred while creating the user. Please try again.',
+                'title' => __('users.notify_create_error_title'),
+                'message' => __('users.notify_create_error_message'),
                 'details' => $errorDetails,
             ]);
         }
@@ -106,8 +106,8 @@ class UserController extends Controller
 
             return redirect()->route('users.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Success',
-                'message' => 'User details have been updated successfully.',
+                'title' => __('users.notify_updated_title'),
+                'message' => __('users.notify_updated_message'),
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating user: ' . $e->getMessage());
@@ -119,8 +119,8 @@ class UserController extends Controller
 
             return back()->withInput()->with('notify', [
                 'type' => 'error',
-                'title' => 'Update Failed',
-                'message' => 'Unable to update user details due to a system error.',
+                'title' => __('users.notify_update_error_title'),
+                'message' => __('users.notify_update_error_message'),
                 'details' => $errorDetails,
             ]);
         }
@@ -138,8 +138,8 @@ class UserController extends Controller
 
             return redirect()->route('users.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Deleted',
-                'message' => 'The user has been removed from the system.',
+                'title' => __('users.notify_deleted_title'),
+                'message' => __('users.notify_deleted_message'),
             ]);
         } catch (\Exception $e) {
             Log::error('Error deleting user: ' . $e->getMessage());
@@ -151,8 +151,8 @@ class UserController extends Controller
 
             return back()->with('notify', [
                 'type' => 'error',
-                'title' => 'Deletion Failed',
-                'message' => 'Unable to delete the user. Please check system logs.',
+                'title' => __('users.notify_delete_error_title'),
+                'message' => __('users.notify_delete_error_message'),
                 'details' => $errorDetails,
             ]);
         }

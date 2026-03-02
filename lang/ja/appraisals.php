@@ -59,4 +59,28 @@ return [
     'status_under_review'   => '審査中',
     'status_completed'      => '完了',
     'status_rejected'       => '却下',
+
+    // Flash messages (notify)
+    'notify_created_title'          => '成功',
+    'notify_created_message'        => '査定申請が正常に作成されました。',
+    'notify_create_error_title'     => '操作失敗',
+    'notify_create_error_message'   => 'リクエストの作成中にエラーが発生しました。もう一度お試しください。',
+    'notify_updated_title'          => '成功',
+    'notify_updated_message'        => '査定申請が正常に更新されました。',
+    'notify_update_error_title'     => '更新失敗',
+    'notify_update_error_message'   => 'システムエラーのためリクエストの詳細を更新できませんでした。',
+    'notify_deleted_title'          => '削除完了',
+    'notify_deleted_message'        => '査定申請がシステムから削除されました。',
+    'notify_delete_error_title'     => '削除失敗',
+    'notify_delete_error_message'   => 'リクエストを削除できませんでした。システムログを確認してください。',
+
+    // FCM Push Notification
+    'fcm_created_title'             => '新規査定申請',
+    'fcm_created_body'              => 'お客様の :brand :model の査定申請が管理者によって作成されました。',
+    'fcm_rejected_title'            => '査定申請却下',
+    'fcm_rejected_body'             => 'お客様の :brand :model の査定申請は処理できませんでした。',
+    'fcm_rejected_reason'           => ' 理由：:reason',
+    'fcm_updated_title'             => '査定更新',
+    'fcm_updated_body'              => 'お客様の :brand :model の査定ステータスが「:status」に更新されました。',
+    'fcm_updated_price'             => ' 最終価格：¥:price。',
 ];

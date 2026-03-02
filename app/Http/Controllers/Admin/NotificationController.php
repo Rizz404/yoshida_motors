@@ -53,8 +53,8 @@ class NotificationController extends Controller
 
         return back()->with('notify', [
             'type' => 'success',
-            'title' => 'Success',
-            'message' => 'Notification marked as read.',
+            'title' => __('notifications.notify_read_title'),
+            'message' => __('notifications.notify_read_message'),
         ]);
     }
 
@@ -69,8 +69,8 @@ class NotificationController extends Controller
 
         return back()->with('notify', [
             'type' => 'success',
-            'title' => 'Success',
-            'message' => 'All notifications marked as read.',
+            'title' => __('notifications.notify_all_read_title'),
+            'message' => __('notifications.notify_all_read_message'),
         ]);
     }
 
@@ -88,16 +88,16 @@ class NotificationController extends Controller
 
             return redirect()->route('notifications.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Deleted',
-                'message' => 'The notification has been removed.',
+                'title' => __('notifications.notify_deleted_title'),
+                'message' => __('notifications.notify_deleted_message'),
             ]);
         } catch (\Exception $e) {
             Log::error('Error deleting notification: ' . $e->getMessage());
 
             return back()->with('notify', [
                 'type' => 'error',
-                'title' => 'Deletion Failed',
-                'message' => 'Unable to delete the notification.',
+                'title' => __('notifications.notify_delete_error_title'),
+                'message' => __('notifications.notify_delete_error_message'),
             ]);
         }
     }

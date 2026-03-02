@@ -29,24 +29,24 @@ class LoginController extends Controller
 
                 return back()->with('notify', [
                     'type' => 'warning',
-                    'title' => 'Access Denied',
-                    'message' => 'You do not have administrative privileges to access this area.',
+                    'title' => __('auth.notify_access_denied_title'),
+                    'message' => __('auth.notify_access_denied_message'),
                 ])->onlyInput('email');
             }
 
             // Successful Login
             return redirect()->intended(route('dashboard'))->with('notify', [
                 'type' => 'success',
-                'title' => 'Welcome Back',
-                'message' => 'You have successfully logged in.',
+                'title' => __('auth.notify_welcome_title'),
+                'message' => __('auth.notify_welcome_message'),
             ]);
         }
 
         // Failed Login
         return back()->with('notify', [
             'type' => 'error',
-            'title' => 'Authentication Failed',
-            'message' => 'The provided credentials do not match our records.',
+            'title' => __('auth.notify_auth_failed_title'),
+            'message' => __('auth.notify_auth_failed_message'),
         ])->onlyInput('email');
     }
 
@@ -58,8 +58,8 @@ class LoginController extends Controller
 
         return redirect()->route('login')->with('notify', [
             'type' => 'info',
-            'title' => 'Signed Out',
-            'message' => 'You have been logged out successfully.',
+            'title' => __('auth.notify_signed_out_title'),
+            'message' => __('auth.notify_signed_out_message'),
         ]);
     }
 }

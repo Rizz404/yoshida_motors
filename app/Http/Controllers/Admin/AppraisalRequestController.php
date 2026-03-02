@@ -100,8 +100,8 @@ class AppraisalRequestController extends Controller
             /** @var \App\Models\User $user */
             $user = User::find($validated['user_id']);
             if ($user) {
-                $title = 'New Appraisal Request';
-                $body = "An appraisal request for your {$appraisalRequest->vehicle_brand} {$appraisalRequest->vehicle_model} has been created by Admin.";
+                $title = __('appraisals.fcm_created_title');
+                $body = __('appraisals.fcm_created_body', ['brand' => $appraisalRequest->vehicle_brand, 'model' => $appraisalRequest->vehicle_model]);
                 $data = [
                     'type' => 'appraisal_created',
                     'appraisal_id' => (string) $appraisalRequest->id,
@@ -122,8 +122,8 @@ class AppraisalRequestController extends Controller
 
             return redirect()->route('appraisals.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Success',
-                'message' => 'The appraisal request has been created successfully.',
+                'title' => __('appraisals.notify_created_title'),
+                'message' => __('appraisals.notify_created_message'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack(); // Batalkan semua kalau ada error
@@ -136,8 +136,8 @@ class AppraisalRequestController extends Controller
 
             return back()->withInput()->with('notify', [
                 'type' => 'error',
-                'title' => 'Operation Failed',
-                'message' => 'An error occurred while creating the request. Please try again.',
+                'title' => __('appraisals.notify_create_error_title'),
+                'message' => __('appraisals.notify_create_error_message'),
                 'details' => $errorDetails,
             ]);
         }
@@ -231,18 +231,18 @@ class AppraisalRequestController extends Controller
             $user = $appraisal->user;
             if ($user) {
                 if ($appraisal->status === 'rejected') {
-                    $title = 'Appraisal Request Rejected';
-                    $body = "Your appraisal for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} could not be processed.";
+                    $title = __('appraisals.fcm_rejected_title');
+                    $body = __('appraisals.fcm_rejected_body', ['brand' => $appraisal->vehicle_brand, 'model' => $appraisal->vehicle_model]);
                     if ($appraisal->admin_note) {
-                        $body .= " Reason: {$appraisal->admin_note}";
+                        $body .= __('appraisals.fcm_rejected_reason', ['reason' => $appraisal->admin_note]);
                     }
                 } else {
-                    $title = 'Appraisal Update';
-                    $body = "Your appraisal for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} has been updated to {$appraisal->status}.";
+                    $title = __('appraisals.fcm_updated_title');
+                    $body = __('appraisals.fcm_updated_body', ['brand' => $appraisal->vehicle_brand, 'model' => $appraisal->vehicle_model, 'status' => $appraisal->status]);
 
                     if ($appraisal->final_price) {
-                        $formattedPrice = number_format($appraisal->final_price, 0, ',', '.');
-                        $body .= " Final price: Rp {$formattedPrice}.";
+                        $formattedPrice = number_format($appraisal->final_price, 0, '.', ',');
+                        $body .= __('appraisals.fcm_updated_price', ['price' => $formattedPrice]);
                     }
                 }
 
@@ -267,8 +267,8 @@ class AppraisalRequestController extends Controller
 
             return redirect()->route('appraisals.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Success',
-                'message' => 'Appraisal request has been updated successfully.',
+                'title' => __('appraisals.notify_updated_title'),
+                'message' => __('appraisals.notify_updated_message'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -281,8 +281,8 @@ class AppraisalRequestController extends Controller
 
             return back()->withInput()->with('notify', [
                 'type' => 'error',
-                'title' => 'Update Failed',
-                'message' => 'Unable to update request details due to a system error.',
+                'title' => __('appraisals.notify_update_error_title'),
+                'message' => __('appraisals.notify_update_error_message'),
                 'details' => $errorDetails,
             ]);
         }
@@ -310,8 +310,8 @@ class AppraisalRequestController extends Controller
 
             return redirect()->route('appraisals.index')->with('notify', [
                 'type' => 'success',
-                'title' => 'Deleted',
-                'message' => 'The appraisal request has been removed from the system.',
+                'title' => __('appraisals.notify_deleted_title'),
+                'message' => __('appraisals.notify_deleted_message'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -324,8 +324,8 @@ class AppraisalRequestController extends Controller
 
             return back()->with('notify', [
                 'type' => 'error',
-                'title' => 'Deletion Failed',
-                'message' => 'Unable to delete the request. Please check system logs.',
+                'title' => __('appraisals.notify_delete_error_title'),
+                'message' => __('appraisals.notify_delete_error_message'),
                 'details' => $errorDetails,
             ]);
         }

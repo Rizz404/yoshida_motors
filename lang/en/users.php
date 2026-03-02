@@ -42,4 +42,18 @@ return [
     'current_photo'      => 'Current Photo',
     'keep_photo_hint'    => 'Max 2MB (jpeg, png, jpg, gif). Leave blank to keep current photo.',
     'update_user'        => 'Update User',
+
+    // Flash messages (notify)
+    'notify_created_title'          => 'Success',
+    'notify_created_message'        => 'The user has been created successfully.',
+    'notify_create_error_title'     => 'Operation Failed',
+    'notify_create_error_message'   => 'An error occurred while creating the user. Please try again.',
+    'notify_updated_title'          => 'Success',
+    'notify_updated_message'        => 'User details have been updated successfully.',
+    'notify_update_error_title'     => 'Update Failed',
+    'notify_update_error_message'   => 'Unable to update user details due to a system error.',
+    'notify_deleted_title'          => 'Deleted',
+    'notify_deleted_message'        => 'The user has been removed from the system.',
+    'notify_delete_error_title'     => 'Deletion Failed',
+    'notify_delete_error_message'   => 'Unable to delete the user. Please check system logs.',
 ];

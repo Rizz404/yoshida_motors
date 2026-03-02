@@ -22,4 +22,14 @@ return [
     'additional_data'  => '追加データ',
     'view_appraisal'   => '査定を表示',
     'delete'           => '削除',
+
+    // Flash messages (notify)
+    'notify_read_title'             => '成功',
+    'notify_read_message'           => '通知を既読にしました。',
+    'notify_all_read_title'         => '成功',
+    'notify_all_read_message'       => 'すべての通知を既読にしました。',
+    'notify_deleted_title'          => '削除完了',
+    'notify_deleted_message'        => '通知が削除されました。',
+    'notify_delete_error_title'     => '削除失敗',
+    'notify_delete_error_message'   => '通知を削除できませんでした。',
 ];
