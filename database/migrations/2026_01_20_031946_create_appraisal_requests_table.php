@@ -28,7 +28,7 @@ return new class extends Migration
 
             // Hasil Appraisal (Diisi Admin)
             $table->decimal('final_price', 15, 2)->nullable();
-            $table->text('admin_note')->nullable();
+            $table->text('admin_note')->nullable(); // Visible to user — used as reason/note from admin (e.g. rejection reason)
             $table->dateTime('price_valid_until')->nullable();
             $table->timestamps();
         });

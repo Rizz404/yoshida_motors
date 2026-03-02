@@ -739,6 +739,9 @@ cursor          : string (optional) - Cursor for pagination
 GET /appraisals?search=honda&status=draft&year_min=2020&sort_by=year_manufacture&sort_dir=desc&per_page=15
 ```
 
+> **Status values:** `draft` | `submitted` | `under_review` | `completed` | `rejected`
+> **`admin_note`** — Visible to the user. Used by admin to communicate the appraisal result notes or the rejection reason.
+
 **Success Response (200) - Cursor Pagination:**
 ```json
 {

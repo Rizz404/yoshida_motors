@@ -149,7 +149,7 @@
                             {{-- Status --}}
                             <div>
                                 <x-forms.select name="status" :label="__('appraisals.current_status')">
-                                    @foreach (['draft', 'submitted', 'under_review', 'completed'] as $status)
+                                    @foreach (['draft', 'submitted', 'under_review', 'completed', 'rejected'] as $status)
                                         <option value="{{ $status }}"
                                             {{ $appraisal->status === $status ? 'selected' : '' }}>
                                             {{ __('appraisals.status_' . $status) }}

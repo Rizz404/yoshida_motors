@@ -57,6 +57,9 @@
                             <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>
                                 {{ __('appraisals.status_completed') }}
                             </option>
+                            <option value="rejected" {{ old('status') == 'rejected' ? 'selected' : '' }}>
+                                {{ __('appraisals.status_rejected') }}
+                            </option>
                         </x-forms.select>
                     </div>
                 </div>

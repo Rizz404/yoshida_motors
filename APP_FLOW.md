@@ -89,10 +89,11 @@
 - Greeting banner — "Hello, [Name]! Ready for your appraisal?", gradient background `primary600` → `primary900`
 - Active Status Card (if an appraisal is in progress):
   - Status badge colors:
-    - `Draft` → gray `neutral400`
-    - `Submitted` → blue `primary500`
-    - `Under Appraisal` → orange `accent500`
-    - `Price Determined` → green `Color(0xFF22C55E)`
+    - `draft` → gray `neutral400`
+    - `submitted` → blue `primary500`
+    - `under_review` → orange `accent500`
+    - `completed` → green `Color(0xFF22C55E)`
+    - `rejected` → red `Color(0xFFEF4444)`
   - "View Details" button → navigate to `appraisal_result_screen`
 - Main "Start New Appraisal" button — large, full-width, background `accent500`, white text, car icon
 - Bottom Navigation Bar (optional): Home, History, Profile — active icon color `primary600`
@@ -227,21 +228,28 @@
 ### UI Components
 - AppBar: title "Appraisal Result", background `primary700`
 - Status Banner at the top:
-  - If `under_appraisal` → orange/yellow banner `accent100`, text "Under Review — We'll notify you soon", clock icon `accent600`
-  - If `price_determined` → green banner `Color(0xFFDCFCE7)`, text "Review Complete!", green checkmark icon
-- Main Price Card (only visible if `price_determined`):
+  - If `under_review` → orange/yellow banner `accent100`, text "Under Review — We'll notify you soon", clock icon `accent600`
+  - If `completed` → green banner `Color(0xFFDCFCE7)`, text "Review Complete!", green checkmark icon
+  - If `rejected` → red banner `Color(0xFFFFE4E6)`, text "Request Rejected", red X icon `Color(0xFFEF4444)`
+- Main Price Card (only visible if `completed`):
   - Label: "Offered Purchase Price", color `neutral500`
   - Large bold price number, color `primary700`, format: `Rp XX.XXX.XXX`
   - Card background `primary50`, border `primary200`
-- Validity Period Card:
+- Validity Period Card (only visible if `completed`):
   - "Valid until: [date]" — calendar icon, text color `neutral700`
-- "Next Steps" section — bullet list of actions for the user, bullet color `accent500`
+- Rejection Reason Card (only visible if `rejected` and `admin_note` is not null):
+  - Label: "Reason", color `neutral500`
+  - `admin_note` text, color `neutral700`
+  - Card background `Color(0xFFFFE4E6)`, border `Color(0xFFFCA5A5)`
+- "Next Steps" section (hidden if `rejected`) — bullet list of actions for the user, bullet color `accent500`
 - "Vehicle Details" section — summary of the appraised vehicle data
 - "Contact Us" button (optional) — outlined border `primary500`, text color `primary600`
 
 ### Logic
 - Fetch data from `/api/appraisals/{id}` on screen load
-- If status is still `under_appraisal` → hide the price card
+- If status is `under_review` → hide price card and rejection card
+- If status is `completed` → show price card; hide rejection card
+- If status is `rejected` → show rejection card with `admin_note` content; hide price card
 - Listen to FCM push notifications; if a notification arrives with the same `appraisalId` → automatically refresh the screen data
 - Format price using the `intl` package: `NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ')`
 

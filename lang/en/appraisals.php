@@ -48,8 +48,8 @@ return [
     'current_status'        => 'Current Status',
     'final_price'           => 'Final Price (¥)',
     'price_valid_until'     => 'Price Valid Until',
-    'admin_note'            => 'Internal/Admin Notes',
-    'admin_note_placeholder' => 'Notes for user or internal team...',
+    'admin_note'            => 'Note for Customer',
+    'admin_note_placeholder' => 'Visible to customer — use to explain the result or rejection reason...',
     'customer_info'         => 'Customer Info',
     'save_changes'          => 'Save Changes',
 
@@ -58,4 +58,5 @@ return [
     'status_submitted'      => 'Submitted',
     'status_under_review'   => 'Under Review',
     'status_completed'      => 'Completed',
+    'status_rejected'       => 'Rejected',
 ];

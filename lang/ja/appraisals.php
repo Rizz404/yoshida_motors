@@ -48,8 +48,8 @@ return [
     'current_status'        => '現在のステータス',
     'final_price'           => '最終価格（¥）',
     'price_valid_until'     => '価格有効期限',
-    'admin_note'            => '社内・管理者メモ',
-    'admin_note_placeholder' => 'ユーザーまたは社内チームへのメモ...',
+    'admin_note'            => 'お客様へのメモ',
+    'admin_note_placeholder' => 'お客様に表示されます — 審査結果や却下理由をご記入ください...',
     'customer_info'         => '顧客情報',
     'save_changes'          => '変更を保存',
 
@@ -58,4 +58,5 @@ return [
     'status_submitted'      => '申請済み',
     'status_under_review'   => '審査中',
     'status_completed'      => '完了',
+    'status_rejected'       => '却下',
 ];

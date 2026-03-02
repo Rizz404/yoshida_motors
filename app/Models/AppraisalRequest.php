@@ -38,4 +38,5 @@ class AppraisalRequest extends Model
     const STATUS_SUBMITTED = 'submitted';
     const STATUS_REVIEW = 'under_review';
     const STATUS_COMPLETED = 'completed';
+    const STATUS_REJECTED = 'rejected';
 }

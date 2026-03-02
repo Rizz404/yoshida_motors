@@ -120,6 +120,7 @@
                                         'under_review' => 'bg-primary-container text-primary',
                                         'completed' => 'bg-success-light text-success-dark',
                                         'draft' => 'bg-surface-variant text-text-secondary',
+                                        'rejected' => 'bg-error-light text-error-dark',
                                         default => 'bg-surface-variant text-text-secondary',
                                     };
                                     $statusLabel = __('appraisals.status_' . str_replace('-', '_', $request->status));

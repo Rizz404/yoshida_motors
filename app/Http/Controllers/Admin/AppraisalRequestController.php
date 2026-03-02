@@ -51,7 +51,7 @@ class AppraisalRequestController extends Controller
             'vehicle_model' => 'required|string|max:255',
             'year_manufacture' => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'description' => 'nullable|string',
-            'status' => 'required|in:draft,submitted,under_review,completed',
+            'status' => 'required|in:draft,submitted,under_review,completed,rejected',
             'final_price' => 'nullable|numeric|min:0',
 
             // Validasi Foto: Array of files, max 2MB per foto (opsional)
@@ -165,7 +165,7 @@ class AppraisalRequestController extends Controller
             'vehicle_model' => 'required|string|max:255',
             'year_manufacture' => 'required|integer',
             'description' => 'nullable|string',
-            'status' => 'required|in:draft,submitted,under_review,completed',
+            'status' => 'required|in:draft,submitted,under_review,completed,rejected',
             'final_price' => 'nullable|numeric|min:0',
             'admin_note' => 'nullable|string',
             'price_valid_until' => 'nullable|date',
@@ -230,12 +230,20 @@ class AppraisalRequestController extends Controller
             // Kirim Notifikasi ke User
             $user = $appraisal->user;
             if ($user) {
-                $title = 'Appraisal Update';
-                $body = "Your appraisal for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} has been updated to {$appraisal->status}.";
+                if ($appraisal->status === 'rejected') {
+                    $title = 'Appraisal Request Rejected';
+                    $body = "Your appraisal for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} could not be processed.";
+                    if ($appraisal->admin_note) {
+                        $body .= " Reason: {$appraisal->admin_note}";
+                    }
+                } else {
+                    $title = 'Appraisal Update';
+                    $body = "Your appraisal for {$appraisal->vehicle_brand} {$appraisal->vehicle_model} has been updated to {$appraisal->status}.";
 
-                if ($appraisal->final_price) {
-                    $formattedPrice = number_format($appraisal->final_price, 0, ',', '.');
-                    $body .= " Final price: Rp {$formattedPrice}.";
+                    if ($appraisal->final_price) {
+                        $formattedPrice = number_format($appraisal->final_price, 0, ',', '.');
+                        $body .= " Final price: Rp {$formattedPrice}.";
+                    }
                 }
 
                 $data = [

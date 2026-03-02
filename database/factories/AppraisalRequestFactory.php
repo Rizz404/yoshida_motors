@@ -21,7 +21,7 @@ class AppraisalRequestFactory extends Factory
         $models = ['Civic Turbo', 'Jazz RS', 'Avanza Veloz', 'Xpander Cross', 'Creta', 'Almaz'];
 
         // Kita random statusnya
-        $status = fake()->randomElement(['draft', 'submitted', 'under_review', 'completed']);
+        $status = fake()->randomElement(['draft', 'submitted', 'under_review', 'completed', 'rejected']);
 
         return [
             // Kita ambil user acak nanti di Seeder biar lebih efisien
@@ -39,7 +39,8 @@ class AppraisalRequestFactory extends Factory
                 ? fake()->numberBetween(150, 500) * 10000 // 150万円 - 500万円
                 : null,
 
-            'admin_note' => ($status === 'completed' || $status === 'under_review')
+            // admin_note is visible to user — used for result notes or rejection reason
+            'admin_note' => in_array($status, ['completed', 'under_review', 'rejected'])
                 ? fake()->sentence(10)
                 : null,
 
