@@ -54,20 +54,24 @@
 
 ## Screen 3 — `profile_screen.dart`
 
-**Purpose:** Store user personal data (Name & Address). Used during onboarding and accessible from the menu.
+**Purpose:** Store user personal data (Name, Address, Gender, Birth Date, and optionally Phone Number depending on auth provider). Used during onboarding and accessible from the menu.
 
 ### UI Components
 - AppBar with title "My Profile", background `primary700`, white back icon
 - Avatar/photo placeholder — circle shape, background `primary100`, person icon `primary500`
 - TextField for "Full Name" — label "Full Name", person prefix icon
+- TextField for "Phone Number" — label "Phone Number", phone prefix icon (Only editable if logged in via Email/Google)
 - TextField for "Address" — label "Address", maxLines 3, location prefix icon
+- Dropdown or Radio Buttons for "Gender" (Male, Female, Other)
+- DatePicker for "Birth Date"
 - Full-width "Save Profile" button — background `primary600`, white text
 - All field borders: color `neutral300`, focus border `primary500`
 
 ### Logic
 - Pre-fill data if previously saved (from API / local storage)
-- Validation: all fields are required
-- On save → POST to `/api/profile` → show success SnackBar with color `primary500`
+- Phone number input should generally be read-only if the user logged in using Phone Auth.
+- Validation: Name and Address are usually required.
+- On save → PUT to `/api/profile` → show success SnackBar with color `primary500`
 - If from onboarding (first time) → after save, navigate to `home_screen`
 
 ### Navigation

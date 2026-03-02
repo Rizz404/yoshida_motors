@@ -24,6 +24,11 @@ return [
     'address'            => 'Address',
     'address_placeholder' => 'Enter full address...',
     'profile_photo'      => 'Profile Photo',
+    'gender'             => 'Gender',
+    'male'               => 'Male',
+    'female'             => 'Female',
+    'other'              => 'Other',
+    'birth_date'         => 'Birth Date',
     'max_photo_size'     => 'Max 2MB (jpeg, png, jpg, gif)',
     'save_user'          => 'Save User',
 

@@ -70,6 +70,8 @@ class AuthController extends Controller
             'address' => 'nullable|string',
             'fcm_token' => 'nullable|string',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gender' => 'nullable|in:male,female,other',
+            'birth_date' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -104,6 +106,9 @@ class AuthController extends Controller
                 'address' => $request->address,
                 'fcm_token' => $request->fcm_token,
                 'profile_photo' => $profilePhotoPath,
+                'gender' => $request->gender,
+                'birth_date' => $request->birth_date,
+                'auth_provider' => 'phone',
                 'role' => 'user',
             ]);
 
@@ -229,6 +234,7 @@ class AuthController extends Controller
                     'firebase_uid' => $firebaseUid,
                     'phone_number' => $phone,
                     'fcm_token'    => $request->fcm_token,
+                    'auth_provider' => 'phone',
                     'role'         => 'user',
                 ]);
                 $isNewUser = true;
@@ -281,6 +287,8 @@ class AuthController extends Controller
             'address'      => 'nullable|string',
             'fcm_token'    => 'nullable|string',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gender'       => 'nullable|in:male,female,other',
+            'birth_date'   => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -322,6 +330,9 @@ class AuthController extends Controller
                 'address'      => $request->address,
                 'fcm_token'    => $request->fcm_token,
                 'profile_photo' => $profilePhotoPath,
+                'gender'       => $request->gender,
+                'birth_date'   => $request->birth_date,
+                'auth_provider' => 'email',
                 'role'         => 'user',
             ]);
 
@@ -440,6 +451,7 @@ class AuthController extends Controller
                     'email'        => $email,
                     'name'         => $name,
                     'fcm_token'    => $request->fcm_token,
+                    'auth_provider' => 'google',
                     'role'         => 'user',
                 ]);
                 $isNewUser = true;
@@ -469,19 +481,28 @@ class AuthController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $user = $request->user();
+
+        $rules = [
             'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email,' . $request->user()->id,
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
             'address' => 'nullable|string',
             'fcm_token' => 'nullable|string',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+            'gender' => 'nullable|in:male,female,other',
+            'birth_date' => 'nullable|date',
+        ];
+
+        // Hanya boleh update phone_number jika provider bukan phone
+        if ($user->auth_provider !== 'phone') {
+            $rules['phone_number'] = 'nullable|string|unique:users,phone_number,' . $user->id;
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return $this->validationErrorResponse($validator->errors());
         }
-
-        $user = $request->user();
 
         // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
@@ -494,7 +515,13 @@ class AuthController extends Controller
             $user->profile_photo = $profilePhotoPath;
         }
 
-        $user->update($request->only(['name', 'email', 'address', 'fcm_token']));
+        $fieldsToUpdate = ['name', 'email', 'address', 'fcm_token', 'gender', 'birth_date'];
+
+        if ($user->auth_provider !== 'phone' && $request->has('phone_number')) {
+            $fieldsToUpdate[] = 'phone_number';
+        }
+
+        $user->update($request->only($fieldsToUpdate));
 
         return $this->successResponse($user, 'Profile updated successfully');
     }

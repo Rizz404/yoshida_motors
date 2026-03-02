@@ -123,6 +123,9 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
       "name": "John Doe",
       "email": null,
       "address": "Jakarta Selatan",
+      "gender": "male",
+      "birth_date": "1990-01-01",
+      "auth_provider": "phone",
       "role": "user",
       "fcm_token": "fcm_device_token_here",
       "created_at": "2026-02-09T10:00:00.000000Z",
@@ -147,6 +150,9 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
       "name": null,
       "email": null,
       "address": null,
+      "gender": null,
+      "birth_date": null,
+      "auth_provider": "phone",
       "role": "user",
       "fcm_token": "fcm_device_token_here",
       "created_at": "2026-02-19T10:00:00.000000Z",
@@ -202,6 +208,8 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
   "name": "string (optional, max:255)",
   "email": "string|email (optional, unique)",
   "address": "string (optional)",
+  "gender": "enum (optional) - male, female, other",
+  "birth_date": "date (optional) - YYYY-MM-DD",
   "fcm_token": "string (optional) - Firebase Cloud Messaging token untuk push notif"
 }
 ```
@@ -368,6 +376,8 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
   "name": "string (optional, max:255)",
   "phone_number": "string (optional, unique)",
   "address": "string (optional)",
+  "gender": "enum (optional) - male, female, other",
+  "birth_date": "date (optional) - YYYY-MM-DD",
   "fcm_token": "string (optional)"
 }
 ```
@@ -647,8 +657,11 @@ $firebaseUid = $verifiedToken->claims()->get('sub'); // ← "abc123xyz"
 ```json
 {
   "name": "string (optional)",
+  "phone_number": "string (optional) - Hanya bisa jika auth_provider bukan 'phone'",
   "email": "string|email (optional)",
   "address": "string (optional)",
+  "gender": "enum (optional) - male, female, other",
+  "birth_date": "date (optional) - YYYY-MM-DD",
   "fcm_token": "string (optional)"
 }
 ```
@@ -1442,6 +1455,8 @@ const registerWithPhone = async (phoneNumber, verificationCode, userData) => {
       name: userData.name,
       email: userData.email,
       address: userData.address,
+      gender: userData.gender,
+      birth_date: userData.birthDate,
       fcm_token: await getFCMToken(),
     });
 
@@ -1512,6 +1527,8 @@ const registerWithEmail = async (email, password, userData) => {
       name: userData.name,
       phone_number: userData.phoneNumber,
       address: userData.address,
+      gender: userData.gender,
+      birth_date: userData.birthDate,
       fcm_token: await getFCMToken(),
     });
 

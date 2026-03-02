@@ -34,6 +34,13 @@ return new class extends Migration
             // Token FCM buat Push Notif (Kalau user punya banyak device, ini cuma nyimpen yg terakhir)
             $table->string('fcm_token')->nullable();
 
+            // Data Diri Tambahan
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->date('birth_date')->nullable();
+
+            // Auth Provider (Penting untuk mengecek dari mana user login: phone, email, google)
+            $table->string('auth_provider')->default('email');
+
             // Role user
             $table->enum('role', ['user', 'admin'])->default('user');
 
