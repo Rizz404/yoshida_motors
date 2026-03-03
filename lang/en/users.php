@@ -32,6 +32,14 @@ return [
     'max_photo_size'     => 'Max 2MB (jpeg, png, jpg, gif)',
     'save_user'          => 'Save User',
 
+    // Index extras
+    'details'            => 'Details',
+    'auth_provider'      => 'Auth Provider',
+    'email_verified'     => 'Email Verified',
+    'verified'           => 'Verified',
+    'not_verified'       => 'Not Verified',
+    'not_set'            => 'Not Set',
+
     // Edit
     'edit_title'         => 'Edit User',
     'edit_heading'       => 'Edit User: :name',
@@ -42,6 +50,13 @@ return [
     'current_photo'      => 'Current Photo',
     'keep_photo_hint'    => 'Max 2MB (jpeg, png, jpg, gif). Leave blank to keep current photo.',
     'update_user'        => 'Update User',
+    'field_locked_email' => 'Locked — email is managed by the ":provider" auth provider.',
+    'field_locked_phone' => 'Locked — phone number is managed by the ":provider" auth provider.',
+    'system_information' => 'System Information (Read-only)',
+    'system_info_hint'   => 'These fields are managed by the system and cannot be edited.',
+    'firebase_uid'       => 'Firebase UID',
+    'fcm_token'          => 'FCM Token (Push Notification)',
+    'account_created'    => 'Account Created',
 
     // Flash messages (notify)
     'notify_created_title'          => 'Success',

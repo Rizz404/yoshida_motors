@@ -13,6 +13,14 @@ return [
     'no_users'           => 'ユーザーが見つかりません。',
     'no_name'            => '名前なし',
 
+    // Index extras
+    'details'            => '詳細',
+    'auth_provider'      => '認証プロバイダ',
+    'email_verified'     => 'メール認証',
+    'verified'           => '認証済み',
+    'not_verified'       => '未認証',
+    'not_set'            => '未設定',
+
     // Create
     'create_title'       => '新規ユーザーの作成',
     'create_heading'     => '新規ユーザーの作成',
@@ -24,6 +32,11 @@ return [
     'address'            => '住所',
     'address_placeholder' => '住所を入力してください...',
     'profile_photo'      => 'プロフィール写真',
+    'gender'             => '性別',
+    'male'               => '男性',
+    'female'             => '女性',
+    'other'              => 'その他',
+    'birth_date'         => '生年月日',
     'max_photo_size'     => '最大2MB（jpeg, png, jpg, gif）',
     'save_user'          => 'ユーザーを保存',
 
@@ -37,6 +50,13 @@ return [
     'current_photo'      => '現在の写真',
     'keep_photo_hint'    => '最大2MB（jpeg, png, jpg, gif）。空白のままにすると現在の写真を保持します。',
     'update_user'        => 'ユーザーを更新',
+    'field_locked_email' => 'ロック済み — メールアドレスは ":provider" 認証プロバイダーによって管理されています。',
+    'field_locked_phone' => 'ロック済み — 電話番号は ":provider" 認証プロバイダーによって管理されています。',
+    'system_information' => 'システム情報（読み取り専用）',
+    'system_info_hint'   => 'これらのフィールドはシステムによって管理されており、編集できません。',
+    'firebase_uid'       => 'Firebase UID',
+    'fcm_token'          => 'FCMトークン（プッシュ通知）',
+    'account_created'    => 'アカウント作成日',
 
     // Flash messages (notify)
     'notify_created_title'          => '成功',

@@ -80,6 +80,8 @@ class UserController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'phone_number' => ['nullable', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
             'role' => 'required|in:user,admin',
+            'gender' => 'nullable|in:male,female,other',
+            'birth_date' => 'nullable|date|before:today',
             'address' => 'nullable|string',
             'password' => 'nullable|string|confirmed',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',

@@ -30,6 +30,12 @@
                             {{ __('users.contact') }}</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                            {{ __('users.details') }}</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                            {{ __('users.auth_provider') }}</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                             {{ __('users.role') }}</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
@@ -42,6 +48,7 @@
                 <tbody class="bg-surface divide-y divide-border">
                     @forelse($users as $user)
                         <tr class="hover:bg-hover transition-colors duration-150">
+                            {{-- User: avatar + name --}}
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="shrink-0 h-10 w-10">
@@ -62,13 +69,80 @@
                                         <div class="text-sm font-medium text-text-primary">
                                             {{ $user->name ?? __('users.no_name') }}
                                         </div>
+                                        <div class="text-xs text-text-secondary">#{{ $user->id }}</div>
                                     </div>
                                 </div>
                             </td>
+
+                            {{-- Contact: email (+ verified badge) + phone --}}
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-text-primary">{{ $user->email }}</div>
+                                <div class="flex items-center gap-1.5 text-sm text-text-primary">
+                                    {{ $user->email ?? '-' }}
+                                    @if ($user->email)
+                                        @if ($user->email_verified_at)
+                                            <span
+                                                class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                title="{{ $user->email_verified_at->format('d M Y H:i') }}">
+                                                ✓
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                                !
+                                            </span>
+                                        @endif
+                                    @endif
+                                </div>
                                 <div class="text-sm text-text-secondary">{{ $user->phone_number ?? '-' }}</div>
+                                @if ($user->address)
+                                    <div class="text-xs text-text-secondary mt-0.5 max-w-[180px] truncate"
+                                        title="{{ $user->address }}">
+                                        {{ $user->address }}
+                                    </div>
+                                @endif
                             </td>
+
+                            {{-- Details: gender + birth date --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-text-primary">
+                                    @if ($user->gender)
+                                        <span class="capitalize">{{ __('users.' . $user->gender) }}</span>
+                                    @else
+                                        <span class="text-text-secondary">-</span>
+                                    @endif
+                                </div>
+                                <div class="text-xs text-text-secondary">
+                                    {{ $user->birth_date ? $user->birth_date->format('d M Y') : '-' }}
+                                </div>
+                            </td>
+
+                            {{-- Auth Provider --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $providerColors = [
+                                        'email' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                        'phone' =>
+                                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                                        'google' =>
+                                            'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                    ];
+                                    $providerColor =
+                                        $providerColors[$user->auth_provider] ??
+                                        'bg-surface-variant text-text-secondary';
+                                @endphp
+                                <span
+                                    class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full {{ $providerColor }}">
+                                    {{ ucfirst($user->auth_provider ?? 'email') }}
+                                </span>
+                                @if ($user->firebase_uid)
+                                    <div class="text-xs text-text-secondary mt-0.5 max-w-[100px] truncate"
+                                        title="{{ $user->firebase_uid }}">
+                                        UID: {{ $user->firebase_uid }}
+                                    </div>
+                                @endif
+                            </td>
+
+                            {{-- Role --}}
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -76,9 +150,14 @@
                                     {{ ucfirst($user->role) }}
                                 </span>
                             </td>
+
+                            {{-- Joined Date --}}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                                 {{ $user->created_at->format('d M Y') }}
+                                <div class="text-xs">{{ $user->created_at->format('H:i') }}</div>
                             </td>
+
+                            {{-- Actions --}}
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 <a href="{{ route('users.edit', $user) }}"
                                     class="text-primary hover:text-primary/70 font-semibold">{{ __('common.edit') }}</a>
@@ -94,7 +173,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-text-secondary">
+                            <td colspan="7" class="px-6 py-4 text-center text-text-secondary">
                                 {{ __('users.no_users') }}
                             </td>
                         </tr>
