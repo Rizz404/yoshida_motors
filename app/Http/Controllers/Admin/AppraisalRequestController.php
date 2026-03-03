@@ -50,6 +50,8 @@ class AppraisalRequestController extends Controller
             'vehicle_brand' => 'required|string|max:255',
             'vehicle_model' => 'required|string|max:255',
             'year_manufacture' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'license_plate' => 'nullable|string|max:20',
+            'mileage' => 'nullable|integer|min:0',
             'description' => 'nullable|string',
             'status' => 'required|in:draft,submitted,under_review,completed,rejected',
             'final_price' => 'nullable|numeric|min:0',
@@ -70,10 +72,11 @@ class AppraisalRequestController extends Controller
                 'vehicle_brand' => $validated['vehicle_brand'],
                 'vehicle_model' => $validated['vehicle_model'],
                 'year_manufacture' => $validated['year_manufacture'],
+                'license_plate' => $validated['license_plate'] ?? null,
+                'mileage' => $validated['mileage'] ?? null,
                 'description' => $validated['description'] ?? null,
                 'status' => $validated['status'],
                 'final_price' => $validated['final_price'] ?? null,
-                // 'admin_note' bisa ditambahin kalau ada inputnya
             ]);
 
             // 2. Handle Upload Foto (Kalau ada)
@@ -161,10 +164,7 @@ class AppraisalRequestController extends Controller
     public function update(Request $request, AppraisalRequest $appraisal)
     {
         $validated = $request->validate([
-            'vehicle_brand' => 'required|string|max:255',
-            'vehicle_model' => 'required|string|max:255',
-            'year_manufacture' => 'required|integer',
-            'description' => 'nullable|string',
+            // Admin-only fields (user-submitted vehicle data is read-only)
             'status' => 'required|in:draft,submitted,under_review,completed,rejected',
             'final_price' => 'nullable|numeric|min:0',
             'admin_note' => 'nullable|string',
@@ -182,12 +182,8 @@ class AppraisalRequestController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Update Data Utama
+            // 1. Update Data Admin (Bukan data yang user kirim)
             $appraisal->update([
-                'vehicle_brand' => $validated['vehicle_brand'],
-                'vehicle_model' => $validated['vehicle_model'],
-                'year_manufacture' => $validated['year_manufacture'],
-                'description' => $validated['description'] ?? null,
                 'status' => $validated['status'],
                 'final_price' => $validated['final_price'] ?? null,
                 'admin_note' => $validated['admin_note'] ?? null,

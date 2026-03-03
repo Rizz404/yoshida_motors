@@ -20,22 +20,62 @@
                 {{-- LEFT COLUMN: Main Info --}}
                 <div class="lg:col-span-2 space-y-6">
 
-                    {{-- Card: Vehicle Details --}}
+                    {{-- Card: Vehicle Details (Read-Only — submitted by customer) --}}
                     <div class="bg-card shadow-sm rounded-lg border border-border p-6">
-                        <h3 class="text-lg font-semibold text-text-primary mb-4">{{ __('appraisals.vehicle_details') }}
-                        </h3>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                            <x-forms.input name="vehicle_brand" :label="__('appraisals.brand')" :value="$appraisal->vehicle_brand" required />
-                            <x-forms.input name="vehicle_model" :label="__('appraisals.model')" :value="$appraisal->vehicle_model" required />
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-text-primary">
+                                {{ __('appraisals.vehicle_details') }}
+                            </h3>
+                            <span
+                                class="inline-flex items-center gap-1 text-xs text-text-secondary bg-surface-variant px-2.5 py-1 rounded-full font-medium">
+                                <x-heroicon-o-lock-closed class="w-3.5 h-3.5" />
+                                {{ __('common.readonly') }}
+                            </span>
                         </div>
+                        <p class="text-xs text-text-secondary mb-4">{{ __('appraisals.vehicle_readonly_hint') }}</p>
 
-                        <div class="mb-4">
-                            <x-forms.input type="number" name="year_manufacture" :label="__('appraisals.year')" :value="$appraisal->year_manufacture"
-                                required />
-                        </div>
-
-                        <x-forms.textarea name="description" :label="__('appraisals.description')" rows="4" :value="$appraisal->description" />
+                        <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                            <div>
+                                <dt class="text-xs font-medium text-text-secondary mb-0.5">{{ __('appraisals.brand') }}
+                                </dt>
+                                <dd class="text-text-primary font-semibold">{{ $appraisal->vehicle_brand }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-medium text-text-secondary mb-0.5">{{ __('appraisals.model') }}
+                                </dt>
+                                <dd class="text-text-primary font-semibold">{{ $appraisal->vehicle_model }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-medium text-text-secondary mb-0.5">{{ __('appraisals.year') }}
+                                </dt>
+                                <dd class="text-text-primary">{{ $appraisal->year_manufacture }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-medium text-text-secondary mb-0.5">
+                                    {{ __('appraisals.license_plate_label') }}</dt>
+                                <dd class="text-text-primary font-mono">
+                                    {{ $appraisal->license_plate ?? '—' }}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-medium text-text-secondary mb-0.5">
+                                    {{ __('appraisals.mileage_label') }}</dt>
+                                <dd class="text-text-primary">
+                                    @if ($appraisal->mileage)
+                                        {{ number_format($appraisal->mileage) }} km
+                                    @else
+                                        —
+                                    @endif
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-medium text-text-secondary mb-0.5">
+                                    {{ __('appraisals.description') }}</dt>
+                                <dd class="text-text-primary col-span-2 whitespace-pre-wrap">
+                                    {{ $appraisal->description ?? '—' }}
+                                </dd>
+                            </div>
+                        </dl>
                     </div>
 
                     {{-- Card: Photos Management --}}

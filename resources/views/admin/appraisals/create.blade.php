@@ -35,10 +35,16 @@
                         <x-forms.input name="vehicle_model" :label="__('appraisals.model')" placeholder="e.g. Jazz RS" required />
                     </div>
 
-                    {{-- Year --}}
-                    <div class="w-full md:w-1/3">
+                    {{-- Year & License Plate --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <x-forms.input type="number" name="year_manufacture" :label="__('appraisals.year_of_manufacture')" placeholder="2020"
                             min="1900" max="{{ date('Y') + 1 }}" required />
+                        <x-forms.input type="text" name="license_plate" :label="__('appraisals.license_plate')" :placeholder="__('appraisals.license_plate_placeholder')" />
+                    </div>
+
+                    {{-- Mileage --}}
+                    <div class="w-full md:w-1/3">
+                        <x-forms.input type="number" name="mileage" :label="__('appraisals.mileage')" placeholder="0" min="0" />
                     </div>
 
                     {{-- Description --}}

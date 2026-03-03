@@ -80,6 +80,16 @@
                                     {{ $request->year_manufacture }} {{ $request->vehicle_brand }}
                                 </div>
                                 <div class="text-sm text-text-secondary">{{ $request->vehicle_model }}</div>
+                                @if ($request->license_plate)
+                                    <div class="text-xs text-text-secondary mt-0.5">
+                                        🪪 {{ $request->license_plate }}
+                                    </div>
+                                @endif
+                                @if ($request->mileage)
+                                    <div class="text-xs text-text-secondary">
+                                        {{ number_format($request->mileage) }} km
+                                    </div>
+                                @endif
                             </td>
 
                             {{-- Owner --}}
@@ -138,7 +148,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-text-secondary">
+                            <td colspan="6" class="px-6 py-12 text-center text-text-secondary">
                                 <div class="flex flex-col items-center justify-center">
                                     <x-heroicon-o-document-text class="w-12 h-12 text-text-tertiary mb-3" />
                                     <p>{{ __('appraisals.no_requests') }}</p>

@@ -23,8 +23,7 @@ return [
     'year'          => '年式',
     'year_short'    => '年式：:year',
     'delete_photo'  => '削除',
-    'image_not_available' => '画像が利用できません',
-    'select_locale' => '言語',
+    'image_not_available' => '画像が利用できません',    'readonly'      => '読み取り専用',    'select_locale' => '言語',
     'locale_en'     => 'English',
     'locale_ja'     => '日本語',
 ];

@@ -24,6 +24,7 @@ return [
     'year_short'    => 'Year: :year',
     'delete_photo'  => 'Delete',
     'image_not_available' => 'Image not available',
+    'readonly'      => 'Read-only',
     'select_locale' => 'Language',
     'locale_en'     => 'English',
     'locale_ja'     => '日本語',
