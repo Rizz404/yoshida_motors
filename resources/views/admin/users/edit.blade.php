@@ -96,8 +96,8 @@
 
                     @if ($user->profile_photo)
                         <div class="mb-3 flex items-center space-x-4">
-                            <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="Current profile photo"
-                                class="w-20 h-20 rounded-full object-cover border-2 border-border">
+                            <x-ui.image :src="asset('storage/' . $user->profile_photo)" alt="Current profile photo" shape="circle" size="lg"
+                                preview fallback="initials" :initials="$user->name ?? 'U'" />
                             <span class="text-sm text-text-secondary">{{ __('users.current_photo') }}</span>
                         </div>
                     @endif

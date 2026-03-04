@@ -92,20 +92,10 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="shrink-0 h-10 w-10">
-                                        @if ($request->user->profile_photo)
-                                            <img class="h-10 w-10 rounded-full object-cover"
-                                                src="{{ asset('storage/' . $request->user->profile_photo) }}"
-                                                alt="{{ $request->user->name }}">
-                                        @else
-                                            <div
-                                                class="h-10 w-10 rounded-full bg-primary-container flex items-center justify-center">
-                                                <span class="text-primary font-semibold text-sm">
-                                                    {{ strtoupper(substr($request->user->name ?? 'U', 0, 1)) }}
-                                                </span>
-                                            </div>
-                                        @endif
-                                    </div>
+                                    <x-ui.image :src="$request->user->profile_photo
+                                        ? asset('storage/' . $request->user->profile_photo)
+                                        : null" :alt="$request->user->name ?? __('common.unknown_user')" shape="circle" size="sm"
+                                        fallback="initials" :initials="$request->user->name ?? 'U'" class="shrink-0" />
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-text-primary">
                                             {{ $request->user->name ?? __('common.unknown_user') }}</div>

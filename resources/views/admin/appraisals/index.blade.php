@@ -58,20 +58,8 @@
                             @php $firstPhoto = $request->photos->first(); @endphp
 
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($firstPhoto)
-                                    <img src="{{ asset('storage/' . $firstPhoto->image_path) }}" alt="Request photo"
-                                        class="w-16 h-16 rounded-md object-cover border border-border bg-surface-variant"
-                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                                    <div
-                                        class="hidden w-16 h-16 rounded-md border border-border bg-surface-variant items-center justify-center text-text-tertiary text-[10px] text-center p-1">
-                                        {{ __('common.no_image') }}
-                                    </div>
-                                @else
-                                    <div
-                                        class="w-16 h-16 rounded-md border border-border bg-surface-variant flex items-center justify-center text-text-tertiary text-[10px] text-center p-1">
-                                        {{ __('common.no_image') }}
-                                    </div>
-                                @endif
+                                <x-ui.image :src="$firstPhoto ? asset('storage/' . $firstPhoto->image_path) : null" alt="Request photo" shape="rounded" size="md"
+                                    preview />
                             </td>
 
                             {{-- Vehicle Info --}}

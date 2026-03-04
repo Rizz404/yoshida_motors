@@ -87,18 +87,10 @@
                         @if ($appraisal->photos->count() > 0)
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                                 @foreach ($appraisal->photos as $photo)
-                                    <div class="relative group border border-border rounded-lg overflow-hidden">
-                                        {{-- Image Preview --}}
-                                        <img src="{{ asset('storage/' . $photo->image_path) }}"
-                                            alt="{{ $photo->category_name }}"
-                                            class="w-full h-32 object-cover bg-surface-variant"
-                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-
-                                        {{-- Local fallback (no internet needed) --}}
-                                        <div
-                                            class="hidden w-full h-32 bg-surface-variant items-center justify-center text-text-tertiary text-xs text-center p-2">
-                                            {{ __('common.image_not_available') }}
-                                        </div>
+                                    <div class="relative border border-border rounded-lg overflow-hidden">
+                                        {{-- Image with full-size preview modal --}}
+                                        <x-ui.image :src="asset('storage/' . $photo->image_path)" :alt="$photo->category_name" shape="square" size="full"
+                                            height="h-32" preview />
 
                                         {{-- Label --}}
                                         <div
@@ -106,7 +98,7 @@
                                             {{ $photo->category_name }}
                                         </div>
 
-                                        {{-- Delete Overlay --}}
+                                        {{-- Delete checkbox --}}
                                         <div class="absolute top-2 right-2">
                                             <label
                                                 class="flex items-center space-x-1 bg-surface/90 px-2 py-1 rounded shadow-sm border border-error/30 cursor-pointer hover:bg-error-light">
