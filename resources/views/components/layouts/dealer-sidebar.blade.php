@@ -19,7 +19,12 @@
                     'active' => request()->routeIs('dealer.marketplace.*'),
                     'icon' => 'shopping-cart',
                 ],
-                // Notifications can be added later if needed
+                [
+                    'label' => 'My Bids',
+                    'route' => route('dealer.bids.index'),
+                    'active' => request()->routeIs('dealer.bids.*'),
+                    'icon' => 'currency-yen',
+                ],
             ];
         @endphp
 

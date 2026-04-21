@@ -37,6 +37,12 @@
                     'active' => request()->routeIs('users.*'),
                     'icon' => 'users',
                 ],
+                [
+                    'label' => __('navigation.auctions'),
+                    'route' => route('auctions.index'),
+                    'active' => request()->routeIs('auctions.*'),
+                    'icon' => 'trophy',
+                ],
             ];
         @endphp
 

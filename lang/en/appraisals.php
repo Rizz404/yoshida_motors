@@ -65,6 +65,8 @@ return [
     'status_under_review'   => 'Under Review',
     'status_completed'      => 'Completed',
     'status_rejected'       => 'Rejected',
+    'status_in_auction'     => 'In Auction',
+    'status_acquired'       => 'Acquired',
 
     // Flash messages (notify)
     'notify_created_title'          => 'Success',

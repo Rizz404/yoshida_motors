@@ -14,6 +14,7 @@ return [
     'status'               => 'Status',
     'action'               => 'Action',
     'year_label'           => 'Year: :year',
+    'active_auctions'      => 'Active Auctions',
     'no_requests'          => 'No appraisal requests found.',
     'waiting_submissions'  => 'Waiting for new submissions...',
 ];

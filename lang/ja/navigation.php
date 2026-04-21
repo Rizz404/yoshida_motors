@@ -5,6 +5,7 @@ return [
     'appraisals'      => '査定',
     'notifications'   => '通知',
     'user_management' => 'ユーザー管理',
+    'auctions'        => 'オークション',
     'logout'          => 'ログアウト',
     'hi_admin'        => 'こんにちは、Admin',
 ];

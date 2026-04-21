@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AppraisalRequest;
+use App\Models\Auction;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -26,10 +27,14 @@ class DashboardController extends Controller
         $underReview = AppraisalRequest::where('status', 'under_review')->count();
 
         // 4. Total Appraised Value (Total harga 'final_price' dari yang sudah 'completed')
-        // Ini pengganti 'Total Revenue' biar sesuai konteks appraisal ya, Kak!
         $totalValue = AppraisalRequest::where('status', 'completed')->sum('final_price');
 
-        // 5. Recent Submissions (Ambil 5 data terbaru + usernya)
+        // 5. Active Auctions (status open & belum expired)
+        $activeAuctions = Auction::where('status', Auction::STATUS_OPEN)
+            ->where('end_time', '>', now())
+            ->count();
+
+        // 6. Recent Submissions (Ambil 5 data terbaru + usernya)
         $recentRequests = AppraisalRequest::with('user')
             ->latest()
             ->take(5)
@@ -40,6 +45,7 @@ class DashboardController extends Controller
             'pendingReviews',
             'underReview',
             'totalValue',
+            'activeAuctions',
             'recentRequests'
         ));
     }

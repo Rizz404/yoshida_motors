@@ -33,10 +33,17 @@ class AppraisalRequest extends Model
         return $this->hasMany(AppraisalPhoto::class);
     }
 
+    public function auction()
+    {
+        return $this->hasOne(Auction::class);
+    }
+
     // * Anggap aja enum
-    const STATUS_DRAFT = 'draft';
-    const STATUS_SUBMITTED = 'submitted';
-    const STATUS_REVIEW = 'under_review';
-    const STATUS_COMPLETED = 'completed';
-    const STATUS_REJECTED = 'rejected';
+    const STATUS_DRAFT      = 'draft';
+    const STATUS_SUBMITTED  = 'submitted';
+    const STATUS_REVIEW     = 'under_review';
+    const STATUS_COMPLETED  = 'completed';
+    const STATUS_REJECTED   = 'rejected';
+    const STATUS_IN_AUCTION = 'in_auction';
+    const STATUS_ACQUIRED   = 'acquired';
 }

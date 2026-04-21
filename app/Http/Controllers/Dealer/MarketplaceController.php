@@ -3,35 +3,47 @@
 namespace App\Http\Controllers\Dealer;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\AppraisalRequest;
+use App\Models\Auction;
+use App\Models\AuctionBid;
+use Illuminate\Support\Facades\Auth;
 
 class MarketplaceController extends Controller
 {
-    /**
-     * Display a listing of completed appraisals available for bidding.
-     */
     public function index()
     {
-        // For Phase 2, we list vehicles that have been marked as completed/ready for purchase.
-        // As defined in END_TO_END_SYSTEM_WORKFLOW: "They only see a catalog of vehicles ready for purchase"
         $vehicles = AppraisalRequest::with('photos')
-            ->where('status', 'completed')
+            ->where('status', AppraisalRequest::STATUS_COMPLETED)
             ->latest()
             ->paginate(12);
 
-        return view('dealer.marketplace.index', compact('vehicles'));
+        $auctions = Auction::with(['appraisalRequest.photos'])
+            ->where('status', Auction::STATUS_OPEN)
+            ->latest()
+            ->paginate(12, ['*'], 'auction_page');
+
+        return view('dealer.marketplace.index', compact('vehicles', 'auctions'));
     }
 
-    /**
-     * Display the specified vehicle details.
-     */
     public function show($id)
     {
-        $vehicle = AppraisalRequest::with('photos')
-            ->where('status', 'completed')
+        // Allow viewing both completed and in_auction vehicles
+        $vehicle = AppraisalRequest::with(['photos', 'auction'])
+            ->whereIn('status', [
+                AppraisalRequest::STATUS_COMPLETED,
+                AppraisalRequest::STATUS_IN_AUCTION,
+            ])
             ->findOrFail($id);
 
-        return view('dealer.marketplace.show', compact('vehicle'));
+        $auction    = $vehicle->auction;
+        $dealerBid  = null;
+
+        if ($auction) {
+            $dealerBid = AuctionBid::where('auction_id', $auction->id)
+                ->where('dealer_id', Auth::id())
+                ->first();
+        }
+
+        return view('dealer.marketplace.show', compact('vehicle', 'auction', 'dealerBid'));
     }
 }

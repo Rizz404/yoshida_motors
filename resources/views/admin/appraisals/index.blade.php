@@ -96,6 +96,8 @@
                                         'under_review' => 'bg-warning-light text-warning-dark',
                                         'completed' => 'bg-success-light text-success-dark',
                                         'rejected' => 'bg-error-light text-error-dark',
+                                        'in_auction' => 'bg-purple-100 text-purple-700',
+                                        'acquired' => 'bg-teal-100 text-teal-700',
                                         default => 'bg-surface-variant text-text-secondary',
                                     };
                                     $statusLabel = __('appraisals.status_' . str_replace('-', '_', $request->status));
