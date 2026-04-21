@@ -22,3 +22,4 @@
   - `feat(dealer):`, `feat(appraisals):`, `feat(user):`
   - `fix(routes):`, `refactor(models):`, `docs(admin-flow):`
 - One commit per task. Do not mix unrelated changes in a single commit.
+- Do not include any Claude references in commit messages. No `🤖 Generated with Claude`, no `Co-Authored-By: Claude`, nothing.
