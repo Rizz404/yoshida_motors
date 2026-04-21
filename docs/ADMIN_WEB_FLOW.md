@@ -1,6 +1,12 @@
 # Yoshida Motors — Admin & Dealer Web Flow
 
-This document describes the complete journey from the web portal's perspective when using the Yoshida Motors Admin Panel. It covers all screens, logic, and actions available within the web-based admin interface, as well as the restricted Dealer Workspace introduced in Phase 2.
+This document describes the complete journey from the web portal's perspective when using the Yoshida Motors Admin Panel. It covers all screens, logic, and actions available within the web-based admin interface, as well as the restricted Dealer Workspace across all four development phases.
+
+> **Implementation Status**
+> - **Phase 1** (Appraisal & Admin Review): ✅ Implemented
+> - **Phase 2** (Dealer Marketplace): ✅ Implemented
+> - **Phase 3** (Bidding & Auction System): 🔲 Planned
+> - **Phase 4** (Inspection Workflow & Logistics): 🔲 Planned
 
 ---
 
@@ -44,6 +50,10 @@ A fixed left sidebar with a dark teal background (`#0f3d3a`) contains:
   | User Management | `/users`         |
 - **Logout Button** at the bottom: submits a `POST /logout` form, clears the session, and redirects to the Login page.
 
+> **Phase 3 Addition**: An **"Auction"** link will be added to the sidebar for managing the auction pool.
+>
+> **Phase 4 Addition**: A **"Vehicles"** or **"Inventory"** link will be added for post-acquisition vehicle lifecycle management.
+
 ### Top Bar
 
 Each page has a page-level heading and contextual action buttons rendered inline at the top of the content area (e.g., "Add New User" or "New Request" buttons).
@@ -71,6 +81,8 @@ Four summary cards are displayed in a responsive grid:
 | **Under Review**          | Count of appraisals with status `under_review` — currently being processed.            |
 | **Total Appraised Value** | Sum of `final_price` for all appraisals with status `completed`, displayed in Yen (¥). |
 
+> **Phase 3 Addition**: Additional stat cards for **Active Auctions** (currently running) and **Pending Invoices** (won bids awaiting payment).
+
 ### Recent Submissions Table
 
 Below the stat cards, a table displays the **5 most recently created** appraisal requests with the following columns:
@@ -78,7 +90,7 @@ Below the stat cards, a table displays the **5 most recently created** appraisal
 - **Owner**: Profile avatar (or initials fallback) + full name + email.
 - **Car Details**: Vehicle brand + model + manufacture year.
 - **Date**: Submission date formatted as `Mon DD, YYYY`.
-- **Status**: Color-coded status badge (see [Status Reference](#7-appraisal-status-reference)).
+- **Status**: Color-coded status badge (see [Status Reference](#8-appraisal-status-reference)).
 - **Action**: A **"Review"** link that navigates directly to the appraisal's edit page.
 
 A **"View All"** link at the top-right of the table navigates to the full Appraisals list.
@@ -304,7 +316,38 @@ Managed by `Admin\NotificationController`. These are system notifications direct
 
 ---
 
-## 7. Appraisal Status Reference
+## 7. Dealer Workspace / Marketplace — Phase 2
+
+Users with the **Dealer** role log into the exact same web portal but are restricted via RBAC to their specific workspace.
+
+### 7a. Dealer Layout / Access Restrictions
+
+- **Sidebar**: Specially tailored navigation for Dealers:
+  | Label       | Route                 |
+  | ----------- | --------------------- |
+  | Marketplace | `/dealer/marketplace` |
+- **Restricted Access**: Dealers **cannot** access any administrative tools (`/dashboard`, `/appraisals`, `/users`, etc.).
+- **Data Privacy**: Dealers **cannot** see original customer personal data (names, emails, contacts), nor the original appraisal prices or admin notes to customers.
+
+> **Phase 3 Addition**: A **"My Bids"** link and a **"My Purchases"** link will be added to the Dealer sidebar once the auction system is live.
+
+### 7b. Vehicle Marketplace (`GET /dealer/marketplace`)
+
+- **Page heading**: "Vehicle Marketplace"
+- Displays a paginated catalog (**12 per page**) of vehicles with status `completed` — appraisals that have been reviewed and priced by the admin and are ready for dealer consideration.
+- **Listing Card Details**: Admin-verified thumbnail photo, vehicle brand, model, manufacture year, and basic specs.
+- **Action**: A **"View Details"** button navigates to the detailed vehicle view.
+
+### 7c. Vehicle Details View (`GET /dealer/marketplace/{id}`)
+
+- **Read-Only Detailed View**: Shows comprehensive specifications, condition details, and the full gallery of Admin-verified photos.
+- Customer personal data (name, email, contact) is **not shown**.
+- Original appraisal pricing or admin internal notes are **not shown**.
+- **Blind Bidding** (Phase 3 — upcoming): Will include a bid submission form directly on this page.
+
+---
+
+## 8. Appraisal Status Reference
 
 | Status         | Color          | Description                                                                             |
 | -------------- | -------------- | --------------------------------------------------------------------------------------- |
@@ -314,32 +357,133 @@ Managed by `Admin\NotificationController`. These are system notifications direct
 | `completed`    | Green          | Review is complete. A final purchase price has been set and offered to the customer.    |
 | `rejected`     | Red            | The appraisal was rejected. A rejection reason (admin note) is visible to the customer. |
 
----
-
-## 8. Dealer Workspace / Marketplace (Phase 2)
-
-As part of the Phase 2 expansion, users with the **Dealer** role log into the exact same web portal but are restricted via RBAC to their specific workspace.
-
-### 8a. Dealer Layout / Access Restrictions
-- **Sidebar**: Specially tailored navigation for Dealers (e.g., "Marketplace", "My Purchases", "Settings").
-- **Restricted Access**: Dealers **cannot** access any administrative tools (`/dashboard`, `/appraisals`, `/users`, etc.).
-- **Data Privacy**: Dealers **cannot** see original customer personal data (names, emails, contacts), nor the original appraisal prices or admin notes to customers.
-
-### 8b. Vehicle Marketplace (`GET /dealer/marketplace`)
-- **Page heading**: "Vehicle Marketplace"
-- Displays a catalog of vehicles that have been marked as ready for purchase (typically `completed` or `acquired` vehicles).
-- **Listing Details**: Shows a verified thumbnail photo, brand, model, manufacture year, and basic vehicle specs.
-- **Action**: A **"View Details"** button navigates to the detailed view.
-
-### 8c. Vehicle Details View (`GET /dealer/marketplace/{id}`)
-- **Read-Only Detailed View**: Shows comprehensive specifications, condition reports, and the full gallery of Admin-verified photos.
-- **Blind Bidding (Upcoming Phase 3)**: Will later include functionality to submit blind bids directly from this page.
+> **Phase 3 & 4 Additional Statuses** (planned):
+>
+> | Status       | Color  | Description                                                                   |
+> | ------------ | ------ | ----------------------------------------------------------------------------- |
+> | `in_auction` | Purple | Vehicle has been published to the auction pool. Bidding is open.              |
+> | `acquired`   | Teal   | Winning dealer determined. Pending physical inspection and payment.           |
+> | `inspected`  | Blue   | Inspector has submitted the final checklist. Awaiting admin final review.     |
+> | `sold`       | Black  | Vehicle has been fully paid for and delivered to the winning dealer.          |
 
 ---
 
-## 9. Route Summary
+## 9. Auction Management (Admin) — Phase 3 🔲 Planned
 
-All admin routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
+Managed by `Admin\AuctionController` under `/auctions`.
+
+> This section describes the planned implementation based on Phase 3 of the system workflow. It is not yet implemented.
+
+### 9a. Auction List (`GET /auctions`)
+
+- **Page heading**: "Auction Pool" with a **"+ Publish Vehicle"** button on the right.
+- Lists all vehicles currently in or completed from auction, paginated (**10 per page**).
+- **Table columns**:
+  - **Vehicle**: Thumbnail + Brand + Model + Year.
+  - **Status**: `open` (bidding active), `closed` (time expired), `awarded` (winner selected).
+  - **Bid Window**: Start date/time and end date/time.
+  - **Bid Count**: Number of bids received.
+  - **Highest Bid**: Highest bid amount received (Admin view only).
+  - **Actions**: View Bids, Close Auction, Award Winner.
+
+### 9b. Publish to Auction (`GET /auctions/create` → `POST /auctions`)
+
+- Admin selects a `completed`-status appraisal to publish to the auction pool.
+- **Form fields**:
+  - **Vehicle**: Dropdown/search of completed appraisals not yet in auction.
+  - **Auction Start Date/Time** (required): When bidding opens.
+  - **Auction End Date/Time** (required): When bidding closes.
+  - **Reserve Price** (optional): Minimum acceptable bid; hidden from dealers.
+- On save: the appraisal status changes to `in_auction`. All registered dealers receive a push notification about the new auction listing.
+
+### 9c. Auction Detail & Bids (`GET /auctions/{id}`)
+
+- Displays the vehicle info and the full list of all submitted bids.
+- **Bids Table**: Dealer ID (anonymous), bid amount, submitted at.
+- Bids are visible to the Admin only — dealers cannot see each other's bids (blind bidding).
+- When the auction window expires:
+  - Bidding is automatically locked.
+  - The Admin dashboard highlights the **highest bidder**.
+  - Admin can click **"Award Winner"** to confirm the winning bid and trigger notifications.
+
+### 9d. Awarding the Winner (`POST /auctions/{id}/award`)
+
+- Admin confirms the winning dealer.
+- On confirmation:
+  - Appraisal status changes to `acquired`.
+  - Winning Dealer receives a push notification: *"You have won the auction for [Brand] [Model]"*.
+  - A pending invoice record is created.
+  - Other bidding dealers receive a notification that the auction has closed.
+
+---
+
+## 10. Dealer Bidding — Phase 3 🔲 Planned
+
+### 10a. Auction Pool (Dealer View)
+
+- The **Marketplace** page (`/dealer/marketplace`) will include an **"Auction"** tab or section showing vehicles currently in the `in_auction` status.
+- **Listing Details**: Vehicle thumbnail, brand, model, year, specs, and the **auction countdown timer**.
+- **Action**: **"Place Bid"** button navigates to the bid submission page.
+
+### 10b. Place Bid (`POST /dealer/marketplace/{id}/bid`)
+
+- A form on the vehicle detail page where the dealer enters their highest blind bid.
+- **Rules**:
+  - Dealers can only submit **one bid per vehicle**.
+  - Dealers **cannot see** other dealers' bids or the current highest bid.
+  - Once submitted, a bid is **final and cannot be changed**.
+- On submission: a success message confirms the bid was recorded.
+
+### 10c. My Bids (`GET /dealer/bids`)
+
+- Lists all bids submitted by the current dealer.
+- **Table columns**:
+  - **Vehicle**: Brand + Model + Year.
+  - **Bid Amount**: The dealer's submitted bid.
+  - **Auction Status**: `open`, `closed`, `won`, `lost`.
+- **Won Vehicle**: A **"View Invoice"** link appears for bids with status `won`.
+
+### 10d. My Purchases / Won Vehicles (`GET /dealer/purchases`)
+
+- Lists vehicles the dealer has won at auction.
+- **Status** shows the current lifecycle state: `acquired` → `inspected` → `sold`.
+- Includes a link to the pending invoice once payment details are finalized by the admin.
+
+---
+
+## 11. Vehicle Inspection Workflow — Phase 4 🔲 Planned
+
+> Physical inspection is carried out via the **mobile app** by Yoshida Motors ground staff with the **Inspector Role**. The web panel is involved in the final handoff step only.
+
+### 11a. Inspector Mobile Flow (The App — Inspector View)
+
+- Ground staff with the **Inspector Role** log into the unified mobile app.
+- The app detects their role and routes them directly to the **Inspection Dashboard** (bypassing customer screens).
+- The Inspector selects the vehicle assigned to them (linked to the `acquired` appraisal).
+- They complete a digital **Inspection Checklist**:
+  - Verify physical condition against initial customer photos.
+  - Mark each checklist item (pass/fail/note).
+  - Upload any additional condition photos.
+- On submission: the appraisal status changes to `inspected`, and the admin receives a notification.
+
+### 11b. Admin Final Handoff (Web Panel — Admin View)
+
+- The Admin receives a notification when an inspection report is submitted.
+- On the appraisal edit/review page (`/appraisals/{id}/edit`), a new **"Inspection Report"** card becomes visible when status is `inspected`:
+  - Displays the inspector's checklist results, notes, and any condition photos uploaded.
+- Once the Admin confirms that:
+  - Payment has been received from the winning dealer, and
+  - The vehicle has been physically delivered.
+- The Admin clicks **"Mark as Sold"**, which changes the appraisal status to `sold`.
+- The winning Dealer receives a final push notification confirming delivery.
+
+---
+
+## 12. Route Summary
+
+All web routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
+
+### Phase 1 & 2 Routes (Implemented)
 
 | Method   | URI                                      | Controller Action                      | Description           |
 | -------- | ---------------------------------------- | -------------------------------------- | --------------------- |
@@ -366,3 +510,22 @@ All admin routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
 | `DELETE` | `/{locale}/notifications/{id}`           | `NotificationController@destroy`       | Delete notification   |
 | `GET`    | `/{locale}/dealer/marketplace`           | `Dealer\MarketplaceController@index`   | List available cars   |
 | `GET`    | `/{locale}/dealer/marketplace/{id}`      | `Dealer\MarketplaceController@show`    | View car details      |
+
+### Phase 3 Routes (Planned — Auction)
+
+| Method | URI                                     | Controller Action                 | Description                |
+| ------ | --------------------------------------- | --------------------------------- | -------------------------- |
+| `GET`  | `/{locale}/auctions`                    | `Admin\AuctionController@index`   | Admin auction list         |
+| `GET`  | `/{locale}/auctions/create`             | `Admin\AuctionController@create`  | Publish vehicle to auction |
+| `POST` | `/{locale}/auctions`                    | `Admin\AuctionController@store`   | Save auction listing       |
+| `GET`  | `/{locale}/auctions/{id}`               | `Admin\AuctionController@show`    | View bids for auction      |
+| `POST` | `/{locale}/auctions/{id}/award`         | `Admin\AuctionController@award`   | Award winning bid          |
+| `GET`  | `/{locale}/dealer/bids`                 | `Dealer\BidController@index`      | Dealer: my bids list       |
+| `POST` | `/{locale}/dealer/marketplace/{id}/bid` | `Dealer\BidController@store`      | Dealer: submit blind bid   |
+| `GET`  | `/{locale}/dealer/purchases`            | `Dealer\PurchaseController@index` | Dealer: won vehicles       |
+
+### Phase 4 Routes (Planned — Inspection & Handoff)
+
+| Method | URI                                   | Controller Action                       | Description                 |
+| ------ | ------------------------------------- | --------------------------------------- | --------------------------- |
+| `POST` | `/{locale}/appraisals/{id}/mark-sold` | `Admin\AppraisalRequestController@sold` | Admin marks vehicle as sold |
