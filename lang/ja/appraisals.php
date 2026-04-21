@@ -65,6 +65,8 @@ return [
     'status_under_review'   => '審査中',
     'status_completed'      => '完了',
     'status_rejected'       => '却下',
+    'status_in_auction'     => 'オークション中',
+    'status_acquired'       => '落札済み',
 
     // Flash messages (notify)
     'notify_created_title'          => '成功',

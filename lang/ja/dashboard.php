@@ -14,6 +14,7 @@ return [
     'status'               => 'ステータス',
     'action'               => '操作',
     'year_label'           => '年式：:year',
+    'active_auctions'      => 'アクティブオークション',
     'no_requests'          => '査定申請が見つかりません。',
     'waiting_submissions'  => '新しい申請を待っています...',
 ];

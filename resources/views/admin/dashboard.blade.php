@@ -1,7 +1,7 @@
 <x-layouts.admin :title="__('dashboard.page_title')">
 
     {{-- Stats Grid --}}
-    <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
 
         {{-- Card 1: Total Vehicles --}}
         <div class="p-6 bg-card rounded-xl shadow-sm border border-border">
@@ -51,6 +51,19 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium text-text-secondary">{{ __('dashboard.total_appraised') }}</p>
                     <p class="text-2xl font-bold text-text-primary">¥{{ number_format($totalValue) }}</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 5: Active Auctions --}}
+        <div class="p-6 bg-card rounded-xl shadow-sm border border-border">
+            <div class="flex items-center">
+                <div class="p-3 bg-warning-light rounded-full text-warning-dark">
+                    <x-heroicon-o-trophy class="w-8 h-8" />
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-text-secondary">{{ __('dashboard.active_auctions') }}</p>
+                    <p class="text-2xl font-bold text-text-primary">{{ number_format($activeAuctions) }}</p>
                 </div>
             </div>
         </div>
@@ -121,6 +134,8 @@
                                         'completed' => 'bg-success-light text-success-dark',
                                         'draft' => 'bg-surface-variant text-text-secondary',
                                         'rejected' => 'bg-error-light text-error-dark',
+                                        'in_auction' => 'bg-purple-100 text-purple-700',
+                                        'acquired' => 'bg-teal-100 text-teal-700',
                                         default => 'bg-surface-variant text-text-secondary',
                                     };
                                     $statusLabel = __('appraisals.status_' . str_replace('-', '_', $request->status));
