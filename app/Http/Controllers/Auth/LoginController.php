@@ -24,7 +24,21 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             // Role Authorization Check
-            if (Auth::user()->role !== 'admin') {
+            if (Auth::user()->isAdmin()) {
+                // Successful Login Admin
+                return redirect()->intended(route('dashboard'))->with('notify', [
+                    'type' => 'success',
+                    'title' => __('auth.notify_welcome_title'),
+                    'message' => __('auth.notify_welcome_message'),
+                ]);
+            } elseif (Auth::user()->isDealer()) {
+                // Successful Login Dealer
+                return redirect()->intended(route('dealer.marketplace.index'))->with('notify', [
+                    'type' => 'success',
+                    'title' => __('auth.notify_welcome_title'),
+                    'message' => __('auth.notify_welcome_message'),
+                ]);
+            } else {
                 Auth::logout();
 
                 return back()->with('notify', [
@@ -33,13 +47,6 @@ class LoginController extends Controller
                     'message' => __('auth.notify_access_denied_message'),
                 ])->onlyInput('email');
             }
-
-            // Successful Login
-            return redirect()->intended(route('dashboard'))->with('notify', [
-                'type' => 'success',
-                'title' => __('auth.notify_welcome_title'),
-                'message' => __('auth.notify_welcome_message'),
-            ]);
         }
 
         // Failed Login

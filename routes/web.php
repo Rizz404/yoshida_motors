@@ -27,22 +27,31 @@ Route::prefix('{locale}')
             Route::post('/login', [LoginController::class, 'login'])->name('login.post');
         });
 
-        // Authenticated (admin) routes
+        // Authenticated routes
         Route::middleware('auth')->group(function () {
             Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-            Route::resource('users', UserController::class);
-            Route::resource('appraisals', AppraisalRequestController::class);
+            // Admin only routes
+            Route::middleware('role:admin')->group(function () {
+                Route::resource('users', UserController::class);
+                Route::resource('appraisals', AppraisalRequestController::class);
 
-            // Notifications
-            Route::prefix('notifications')->name('notifications.')->group(function () {
-                Route::get('/', [NotificationController::class, 'index'])->name('index');
-                Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-                Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
-                Route::post('/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
-                Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+                // Notifications
+                Route::prefix('notifications')->name('notifications.')->group(function () {
+                    Route::get('/', [NotificationController::class, 'index'])->name('index');
+                    Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+                    Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+                    Route::post('/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+                    Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+                });
+
+                Route::get('/dashboard', DashboardController::class)->name('dashboard');
             });
 
-            Route::get('/dashboard', DashboardController::class)->name('dashboard');
+            // Dealer only routes
+            Route::middleware('role:dealer')->prefix('dealer')->name('dealer.')->group(function () {
+                Route::get('/marketplace', [App\Http\Controllers\Dealer\MarketplaceController::class, 'index'])->name('marketplace.index');
+                Route::get('/marketplace/{id}', [App\Http\Controllers\Dealer\MarketplaceController::class, 'show'])->name('marketplace.show');
+            });
         });
     });

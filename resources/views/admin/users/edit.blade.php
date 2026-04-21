@@ -53,6 +53,8 @@
                             </option>
                             <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin
                             </option>
+                            <option value="dealer" {{ old('role', $user->role) == 'dealer' ? 'selected' : '' }}>Dealer
+                            </option>
                         </x-forms.select>
                     </div>
                     <div>

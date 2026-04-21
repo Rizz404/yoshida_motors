@@ -134,7 +134,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                    {{ $user->role === 'admin' ? 'bg-primary-container text-primary' : 'bg-surface-variant text-text-secondary' }}">
+                                    {{ $user->role === 'admin' ? 'bg-primary-container text-primary' : ($user->role === 'dealer' ? 'bg-secondary text-white' : 'bg-surface-variant text-text-secondary') }}">
                                     {{ ucfirst($user->role) }}
                                 </span>
                             </td>

@@ -66,4 +66,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    /**
+     * Check if the user is an admin
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the user is a dealer
+     */
+    public function isDealer()
+    {
+        return $this->role === 'dealer';
+    }
 }

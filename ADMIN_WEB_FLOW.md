@@ -1,6 +1,6 @@
-# Yoshida Motors — Admin Web Flow
+# Yoshida Motors — Admin & Dealer Web Flow
 
-This document describes the complete administrator journey from the admin's perspective when using the Yoshida Motors Admin Panel. It covers all screens, logic, and actions available within the web-based admin interface.
+This document describes the complete journey from the web portal's perspective when using the Yoshida Motors Admin Panel. It covers all screens, logic, and actions available within the web-based admin interface, as well as the restricted Dealer Workspace introduced in Phase 2.
 
 ---
 
@@ -18,9 +18,11 @@ Unauthenticated administrators are automatically redirected to the Login page by
   - **Remember Me** checkbox
   - **Forgot Password** link (UI only, no functionality currently wired)
 - Submitting the form calls `POST /login`, processed by `LoginController`.
-- On successful login: the admin is redirected to the **Dashboard**.
+- On successful login: redirection is handled via Role-Based Access Control (RBAC):
+  - **Admin Role**: redirected to the **Admin Dashboard** (`/dashboard`).
+  - **Dealer Role**: redirected to the **Dealer Workspace** (`/dealer/marketplace`).
 - On failure: validation error messages are shown inline next to each field.
-- **Guest-only route**: Authenticated admins who visit `/login` are automatically redirected away.
+- **Guest-only route**: Authenticated users who visit `/login` are automatically redirected to their respective dashboards based on their role.
 
 ---
 
@@ -140,7 +142,7 @@ On failure: the form is re-displayed with validation errors and previously enter
 
 ---
 
-### 4c. Review / Edit Appraisal (`GET /appraisals/{id}/edit` → `PUT /appraisals/{id}`)
+### 4c. Review / Edit Appraisal (`GET /appraisals/{id}/edit` → `PATCH /appraisals/{id}`)
 
 The primary screen for reviewing and processing a customer's appraisal submission.
 
@@ -211,7 +213,7 @@ Managed by `Admin\UserController` using standard Laravel resource routing under 
   - **Contact**: Email (with ✓ verified / ! unverified badge) + phone number + address (truncated).
   - **Details**: Gender + birth date.
   - **Auth Provider**: Badge showing how the user registered — `email`, `phone`, or `google`.
-  - **Role**: Badge showing `user` or `admin`.
+  - **Role**: Badge showing `user`, `admin`, or `dealer`.
   - **Joined Date**: Account creation date.
   - **Actions**:
     - **Edit** → navigates to the Edit User page.
@@ -226,7 +228,7 @@ Managed by `Admin\UserController` using standard Laravel resource routing under 
   - **Full Name** (required)
   - **Email Address** (required, must be unique)
   - **Phone Number** (optional, must be unique)
-  - **Role** (required): Dropdown — `User` or `Admin`.
+  - **Role** (required): Dropdown — `User`, `Admin`, or `Dealer`. (Used when verifying new dealer applications).
   - **Password** (required) + **Confirm Password** (required)
   - **Address** (optional): Textarea.
   - **Profile Photo** (optional): Image file (JPEG/PNG/GIF, max 2 MB). Stored in `storage/app/public/profile_photos/`.
@@ -235,14 +237,14 @@ On successful save: admin is redirected to the Users list with a success banner.
 
 ---
 
-### 5c. Edit User (`GET /users/{id}/edit` → `PUT /users/{id}`)
+### 5c. Edit User (`GET /users/{id}/edit` → `PATCH /users/{id}`)
 
 - **Page heading**: "Edit User — `{name}`" with a back link to the list.
 - **Form fields** (all pre-filled with existing data):
   - **Full Name** (required)
   - **Email Address**: Locked (read-only) if the user registered via `email` or `google` provider. Editable otherwise.
   - **Phone Number**: Locked (read-only) if the user registered via `phone` provider. Editable otherwise.
-  - **Role**: Dropdown — `User` or `Admin`.
+  - **Role**: Dropdown — `User`, `Admin`, or `Dealer`.
   - **Gender**: Dropdown — Male, Female, Other (optional).
   - **Birth Date**: Date picker (optional).
   - **Change Password** section (optional): New Password + Confirm New Password. If left blank, the existing password is preserved.
@@ -314,7 +316,28 @@ Managed by `Admin\NotificationController`. These are system notifications direct
 
 ---
 
-## 8. Route Summary
+## 8. Dealer Workspace / Marketplace (Phase 2)
+
+As part of the Phase 2 expansion, users with the **Dealer** role log into the exact same web portal but are restricted via RBAC to their specific workspace.
+
+### 8a. Dealer Layout / Access Restrictions
+- **Sidebar**: Specially tailored navigation for Dealers (e.g., "Marketplace", "My Purchases", "Settings").
+- **Restricted Access**: Dealers **cannot** access any administrative tools (`/dashboard`, `/appraisals`, `/users`, etc.).
+- **Data Privacy**: Dealers **cannot** see original customer personal data (names, emails, contacts), nor the original appraisal prices or admin notes to customers.
+
+### 8b. Vehicle Marketplace (`GET /dealer/marketplace`)
+- **Page heading**: "Vehicle Marketplace"
+- Displays a catalog of vehicles that have been marked as ready for purchase (typically `completed` or `acquired` vehicles).
+- **Listing Details**: Shows a verified thumbnail photo, brand, model, manufacture year, and basic vehicle specs.
+- **Action**: A **"View Details"** button navigates to the detailed view.
+
+### 8c. Vehicle Details View (`GET /dealer/marketplace/{id}`)
+- **Read-Only Detailed View**: Shows comprehensive specifications, condition reports, and the full gallery of Admin-verified photos.
+- **Blind Bidding (Upcoming Phase 3)**: Will later include functionality to submit blind bids directly from this page.
+
+---
+
+## 9. Route Summary
 
 All admin routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
 
@@ -328,16 +351,18 @@ All admin routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
 | `GET`    | `/{locale}/appraisals/create`            | `AppraisalRequestController@create`    | Create appraisal form |
 | `POST`   | `/{locale}/appraisals`                   | `AppraisalRequestController@store`     | Store new appraisal   |
 | `GET`    | `/{locale}/appraisals/{id}/edit`         | `AppraisalRequestController@edit`      | Edit/review appraisal |
-| `PUT`    | `/{locale}/appraisals/{id}`              | `AppraisalRequestController@update`    | Update appraisal      |
+| `PATCH`  | `/{locale}/appraisals/{id}`              | `AppraisalRequestController@update`    | Update appraisal      |
 | `DELETE` | `/{locale}/appraisals/{id}`              | `AppraisalRequestController@destroy`   | Delete appraisal      |
 | `GET`    | `/{locale}/users`                        | `UserController@index`                 | List users            |
 | `GET`    | `/{locale}/users/create`                 | `UserController@create`                | Create user form      |
 | `POST`   | `/{locale}/users`                        | `UserController@store`                 | Store new user        |
 | `GET`    | `/{locale}/users/{id}/edit`              | `UserController@edit`                  | Edit user form        |
-| `PUT`    | `/{locale}/users/{id}`                   | `UserController@update`                | Update user           |
+| `PATCH`  | `/{locale}/users/{id}`                   | `UserController@update`                | Update user           |
 | `DELETE` | `/{locale}/users/{id}`                   | `UserController@destroy`               | Delete user           |
 | `GET`    | `/{locale}/notifications`                | `NotificationController@index`         | List notifications    |
 | `GET`    | `/{locale}/notifications/{id}`           | `NotificationController@show`          | View notification     |
 | `POST`   | `/{locale}/notifications/mark-all-read`  | `NotificationController@markAllAsRead` | Mark all as read      |
 | `POST`   | `/{locale}/notifications/{id}/mark-read` | `NotificationController@markAsRead`    | Mark single as read   |
 | `DELETE` | `/{locale}/notifications/{id}`           | `NotificationController@destroy`       | Delete notification   |
+| `GET`    | `/{locale}/dealer/marketplace`           | `Dealer\MarketplaceController@index`   | List available cars   |
+| `GET`    | `/{locale}/dealer/marketplace/{id}`      | `Dealer\MarketplaceController@show`    | View car details      |

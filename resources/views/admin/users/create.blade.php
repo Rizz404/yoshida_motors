@@ -25,6 +25,7 @@
                     <x-forms.select name="role" :label="__('users.role')">
                         <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
                         <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="dealer" {{ old('role') == 'dealer' ? 'selected' : '' }}>Dealer</option>
                     </x-forms.select>
                 </div>
 
