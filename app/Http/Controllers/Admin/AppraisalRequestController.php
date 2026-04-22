@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AppraisalRequest;
 use App\Models\AppraisalPhoto;
+use App\Models\InspectionReport;
 use App\Models\User;
 use App\Services\FcmService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // Buat Transaction biar aman
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage; // Buat hapus/simpan file
+use Illuminate\Support\Facades\Storage;
 
 class AppraisalRequestController extends Controller
 {
@@ -149,10 +150,9 @@ class AppraisalRequestController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(AppraisalRequest $appraisal) // Route model binding
+    public function edit(AppraisalRequest $appraisal)
     {
-        // Load data relasi biar di view bisa nampilin foto lama
-        $appraisal->load(['photos', 'user']);
+        $appraisal->load(['photos', 'user', 'inspectionReport.items', 'inspectionReport.photos', 'inspectionReport.inspector']);
 
         $users = User::orderBy('name')->get();
         return view('admin.appraisals.edit', compact('appraisal', 'users'));
@@ -165,7 +165,9 @@ class AppraisalRequestController extends Controller
     {
         $validated = $request->validate([
             // Admin-only fields (user-submitted vehicle data is read-only)
-            'status' => 'required|in:draft,submitted,under_review,completed,rejected',
+            // System-managed statuses (in_auction, acquired, inspected, sold) are included
+            // so they pass through unchanged when the status field is read-only in the view
+            'status' => 'required|in:draft,submitted,under_review,completed,rejected,in_auction,acquired,inspected,sold',
             'final_price' => 'nullable|numeric|min:0',
             'admin_note' => 'nullable|string',
             'price_valid_until' => 'nullable|date',
@@ -279,6 +281,67 @@ class AppraisalRequestController extends Controller
                 'type' => 'error',
                 'title' => __('appraisals.notify_update_error_title'),
                 'message' => __('appraisals.notify_update_error_message'),
+                'details' => $errorDetails,
+            ]);
+        }
+    }
+
+    /**
+     * Mark an inspected appraisal as sold (Phase 4 — final handoff).
+     */
+    public function sold(AppraisalRequest $appraisal)
+    {
+        if ($appraisal->status !== AppraisalRequest::STATUS_INSPECTED) {
+            return back()->with('notify', [
+                'type'    => 'error',
+                'title'   => __('appraisals.notify_sold_error_title'),
+                'message' => __('appraisals.notify_sold_invalid_status'),
+            ]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $appraisal->update(['status' => AppraisalRequest::STATUS_SOLD]);
+
+            DB::commit();
+
+            // Notify the winning dealer
+            $auction = $appraisal->auction()->with('winner')->first();
+            if ($auction && $auction->winner) {
+                $dealer = $auction->winner;
+                $title  = __('appraisals.fcm_sold_title');
+                $body   = __('appraisals.fcm_sold_body', [
+                    'brand' => $appraisal->vehicle_brand,
+                    'model' => $appraisal->vehicle_model,
+                ]);
+                $data = [
+                    'type'         => 'vehicle_sold',
+                    'appraisal_id' => (string) $appraisal->id,
+                ];
+
+                $dealer->notifications()->create(['title' => $title, 'body' => $body, 'data' => $data]);
+
+                if ($dealer->fcm_token) {
+                    FcmService::sendToToken($dealer->fcm_token, $title, $body, $data);
+                }
+            }
+
+            return redirect()->route('appraisals.edit', $appraisal)->with('notify', [
+                'type'    => 'success',
+                'title'   => __('appraisals.notify_sold_title'),
+                'message' => __('appraisals.notify_sold_message'),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error marking appraisal as sold: ' . $e->getMessage());
+
+            $errorDetails = app()->environment('local') ? $e->getMessage() . "\n\n" . $e->getTraceAsString() : null;
+
+            return back()->with('notify', [
+                'type'    => 'error',
+                'title'   => __('appraisals.notify_sold_error_title'),
+                'message' => __('appraisals.notify_sold_error_message'),
                 'details' => $errorDetails,
             ]);
         }

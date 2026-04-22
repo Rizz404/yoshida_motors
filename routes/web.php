@@ -49,6 +49,9 @@ Route::prefix('{locale}')
 
                 Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
+                // Phase 4: Mark vehicle as sold (final handoff after inspection)
+                Route::post('/appraisals/{appraisal}/mark-sold', [AppraisalRequestController::class, 'sold'])->name('appraisals.mark-sold');
+
                 // Auctions
                 Route::get('/auctions', [AuctionController::class, 'index'])->name('auctions.index');
                 Route::get('/auctions/create', [AuctionController::class, 'create'])->name('auctions.create');

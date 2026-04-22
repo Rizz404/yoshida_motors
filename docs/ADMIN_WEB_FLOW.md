@@ -5,8 +5,8 @@ This document describes the complete journey from the web portal's perspective w
 > **Implementation Status**
 > - **Phase 1** (Appraisal & Admin Review): ✅ Implemented
 > - **Phase 2** (Dealer Marketplace): ✅ Implemented
-> - **Phase 3** (Bidding & Auction System): 🔲 Planned
-> - **Phase 4** (Inspection Workflow & Logistics): 🔲 Planned
+> - **Phase 3** (Bidding & Auction System): ✅ Implemented
+> - **Phase 4** (Inspection Workflow & Logistics): ✅ Implemented (web panel handoff only — inspector mobile flow handled by the mobile app)
 
 ---
 
@@ -368,11 +368,9 @@ Users with the **Dealer** role log into the exact same web portal but are restri
 
 ---
 
-## 9. Auction Management (Admin) — Phase 3 🔲 Planned
+## 9. Auction Management (Admin) — Phase 3 ✅ Implemented
 
 Managed by `Admin\AuctionController` under `/auctions`.
-
-> This section describes the planned implementation based on Phase 3 of the system workflow. It is not yet implemented.
 
 ### 9a. Auction List (`GET /auctions`)
 
@@ -417,7 +415,7 @@ Managed by `Admin\AuctionController` under `/auctions`.
 
 ---
 
-## 10. Dealer Bidding — Phase 3 🔲 Planned
+## 10. Dealer Bidding — Phase 3 ✅ Implemented
 
 ### 10a. Auction Pool (Dealer View)
 
@@ -451,7 +449,7 @@ Managed by `Admin\AuctionController` under `/auctions`.
 
 ---
 
-## 11. Vehicle Inspection Workflow — Phase 4 🔲 Planned
+## 11. Vehicle Inspection Workflow — Phase 4 ✅ Implemented
 
 > Physical inspection is carried out via the **mobile app** by Yoshida Motors ground staff with the **Inspector Role**. The web panel is involved in the final handoff step only.
 
@@ -511,7 +509,7 @@ All web routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
 | `GET`    | `/{locale}/dealer/marketplace`           | `Dealer\MarketplaceController@index`   | List available cars   |
 | `GET`    | `/{locale}/dealer/marketplace/{id}`      | `Dealer\MarketplaceController@show`    | View car details      |
 
-### Phase 3 Routes (Planned — Auction)
+### Phase 3 Routes (Implemented — Auction)
 
 | Method | URI                                     | Controller Action                 | Description                |
 | ------ | --------------------------------------- | --------------------------------- | -------------------------- |
@@ -524,7 +522,7 @@ All web routes are prefixed with `/{locale}` where `locale` is `en` or `ja`.
 | `POST` | `/{locale}/dealer/marketplace/{id}/bid` | `Dealer\BidController@store`      | Dealer: submit blind bid   |
 | `GET`  | `/{locale}/dealer/purchases`            | `Dealer\PurchaseController@index` | Dealer: won vehicles       |
 
-### Phase 4 Routes (Planned — Inspection & Handoff)
+### Phase 4 Routes (Implemented — Inspection & Handoff)
 
 | Method | URI                                   | Controller Action                       | Description                 |
 | ------ | ------------------------------------- | --------------------------------------- | --------------------------- |

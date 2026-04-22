@@ -67,6 +67,21 @@ return [
     'status_rejected'       => '却下',
     'status_in_auction'     => 'オークション中',
     'status_acquired'       => '落札済み',
+    'status_inspected'      => '検査済み',
+    'status_sold'           => '売却済み',
+    'status_system_managed' => 'システムフローで管理されています — ここでは編集できません。',
+
+    // Inspection Report (Phase 4)
+    'inspection_report_heading'  => '検査レポート',
+    'inspector'                  => '検査員',
+    'inspection_submitted_at'    => '提出日時',
+    'inspection_checklist'       => 'チェックリスト',
+    'inspection_overall_notes'   => '検査員のメモ',
+    'inspection_photos'          => '状態写真',
+    'inspection_report_pending'  => 'まだ検査レポートが提出されていません。検査員を待っています。',
+    'mark_sold_button'           => '売却済みにする',
+    'mark_sold_confirm'          => '支払いを受け取り、車両を納車したことを確認してください。これにより車両が「売却済み」になり、ディーラーに通知されます。',
+    'mark_sold_hint'             => '売却済みにする前に、支払い受領と車両の納車を確認してください。',
 
     // Flash messages (notify)
     'notify_created_title'          => '成功',
@@ -82,7 +97,16 @@ return [
     'notify_delete_error_title'     => '削除失敗',
     'notify_delete_error_message'   => 'リクエストを削除できませんでした。システムログを確認してください。',
 
+    // Flash messages (Phase 4)
+    'notify_sold_title'             => '車両売却完了',
+    'notify_sold_message'           => '車両が売却済みとしてマークされ、ディーラーに通知されました。',
+    'notify_sold_error_title'       => '操作失敗',
+    'notify_sold_error_message'     => '車両を売却済みにする際にエラーが発生しました。',
+    'notify_sold_invalid_status'    => 'この車両は売却済みにする前に検査済みステータスである必要があります。',
+
     // FCM Push Notification
+    'fcm_sold_title'                => '車両納車完了',
+    'fcm_sold_body'                 => 'ご購入いただいた :brand :model の納車が確認されました。ありがとうございました！',
     'fcm_created_title'             => '新規査定申請',
     'fcm_created_body'              => 'お客様の :brand :model の査定申請が管理者によって作成されました。',
     'fcm_rejected_title'            => '査定申請却下',

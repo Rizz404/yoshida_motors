@@ -67,6 +67,21 @@ return [
     'status_rejected'       => 'Rejected',
     'status_in_auction'     => 'In Auction',
     'status_acquired'       => 'Acquired',
+    'status_inspected'      => 'Inspected',
+    'status_sold'           => 'Sold',
+    'status_system_managed' => 'Managed by system flow — not editable here.',
+
+    // Inspection Report (Phase 4)
+    'inspection_report_heading'  => 'Inspection Report',
+    'inspector'                  => 'Inspector',
+    'inspection_submitted_at'    => 'Submitted At',
+    'inspection_checklist'       => 'Checklist',
+    'inspection_overall_notes'   => 'Inspector Notes',
+    'inspection_photos'          => 'Condition Photos',
+    'inspection_report_pending'  => 'No inspection report submitted yet. Awaiting inspector.',
+    'mark_sold_button'           => 'Mark as Sold',
+    'mark_sold_confirm'          => 'Confirm that payment has been received and the vehicle has been delivered. This will mark the vehicle as SOLD and notify the dealer.',
+    'mark_sold_hint'             => 'Confirm payment received and vehicle delivered before marking as sold.',
 
     // Flash messages (notify)
     'notify_created_title'          => 'Success',
@@ -82,7 +97,16 @@ return [
     'notify_delete_error_title'     => 'Deletion Failed',
     'notify_delete_error_message'   => 'Unable to delete the request. Please check system logs.',
 
+    // Flash messages (Phase 4)
+    'notify_sold_title'             => 'Vehicle Sold',
+    'notify_sold_message'           => 'The vehicle has been marked as sold and the dealer has been notified.',
+    'notify_sold_error_title'       => 'Action Failed',
+    'notify_sold_error_message'     => 'An error occurred while marking the vehicle as sold.',
+    'notify_sold_invalid_status'    => 'This vehicle must be in inspected status before it can be marked as sold.',
+
     // FCM Push Notification
+    'fcm_sold_title'                => 'Vehicle Delivered',
+    'fcm_sold_body'                 => 'Your purchased :brand :model has been confirmed as delivered. Thank you!',
     'fcm_created_title'             => 'New Appraisal Request',
     'fcm_created_body'              => 'An appraisal request for your :brand :model has been created by Admin.',
     'fcm_rejected_title'            => 'Appraisal Request Rejected',

@@ -1,4 +1,8 @@
 <x-layouts.admin :title="__('appraisals.edit_title')">
+    @php
+        $isSystemManaged = in_array($appraisal->status, App\Models\AppraisalRequest::$systemManagedStatuses);
+    @endphp
+
     <div class="max-w-5xl mx-auto">
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold text-text-primary">
@@ -10,6 +14,13 @@
                 &larr; {{ __('common.back_to_list') }}
             </a>
         </div>
+
+        @if (session('notify'))
+            <div class="mb-6">
+                <x-ui.notification :type="session('notify')['type']" :title="session('notify')['title']"
+                    :message="session('notify')['message']" :details="session('notify')['details'] ?? null" />
+            </div>
+        @endif
 
         <form action="{{ route('appraisals.update', $appraisal) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -167,6 +178,142 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Card: Inspection Report (Phase 4 — shown when status is inspected or sold) --}}
+                    @if (in_array($appraisal->status, ['inspected', 'sold']))
+                        @php $report = $appraisal->inspectionReport; @endphp
+                        <div class="bg-card shadow-sm rounded-lg border border-border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-text-primary flex items-center gap-2">
+                                    <x-heroicon-o-clipboard-document-check class="w-5 h-5 text-primary" />
+                                    {{ __('appraisals.inspection_report_heading') }}
+                                </h3>
+                                @if ($appraisal->status === 'sold')
+                                    <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gray-900 text-white">
+                                        {{ __('appraisals.status_sold') }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            @if ($report)
+                                {{-- Inspector info --}}
+                                <div class="mb-4 p-3 bg-background rounded-lg text-sm">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-text-secondary">{{ __('appraisals.inspector') }}</span>
+                                        <span class="font-medium text-text-primary">
+                                            {{ $report->inspector?->name ?? __('common.unknown_user') }}
+                                        </span>
+                                    </div>
+                                    @if ($report->submitted_at)
+                                        <div class="flex justify-between">
+                                            <span class="text-text-secondary">{{ __('appraisals.inspection_submitted_at') }}</span>
+                                            <span class="font-medium text-text-primary">
+                                                {{ $report->submitted_at->format('M d, Y H:i') }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Checklist Items --}}
+                                @if ($report->items->isNotEmpty())
+                                    <div class="mb-4">
+                                        <h4 class="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                                            {{ __('appraisals.inspection_checklist') }}
+                                        </h4>
+                                        <div class="space-y-2">
+                                            @foreach ($report->items as $item)
+                                                @php
+                                                    $resultClasses = match ($item->result) {
+                                                        'pass' => 'text-success-dark bg-success-light',
+                                                        'fail' => 'text-error-dark bg-error-light',
+                                                        'note' => 'text-warning-dark bg-warning-light',
+                                                        default => 'text-text-secondary bg-surface-variant',
+                                                    };
+                                                    $resultIcon = match ($item->result) {
+                                                        'pass' => 'check-circle',
+                                                        'fail' => 'x-circle',
+                                                        'note' => 'exclamation-circle',
+                                                        default => 'question-mark-circle',
+                                                    };
+                                                @endphp
+                                                <div class="flex items-start gap-2 p-2 rounded-lg border border-border">
+                                                    <x-dynamic-component :component="'heroicon-o-' . $resultIcon"
+                                                        class="w-4 h-4 shrink-0 mt-0.5" />
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-text-primary">{{ $item->item_name }}</p>
+                                                        @if ($item->notes)
+                                                            <p class="text-xs text-text-secondary mt-0.5">{{ $item->notes }}</p>
+                                                        @endif
+                                                    </div>
+                                                    <span class="shrink-0 px-1.5 py-0.5 text-xs font-semibold rounded {{ $resultClasses }}">
+                                                        {{ strtoupper($item->result) }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Overall Notes --}}
+                                @if ($report->overall_notes)
+                                    <div class="mb-4">
+                                        <h4 class="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                                            {{ __('appraisals.inspection_overall_notes') }}
+                                        </h4>
+                                        <p class="text-sm text-text-primary bg-background rounded-lg p-3 whitespace-pre-wrap">{{ $report->overall_notes }}</p>
+                                    </div>
+                                @endif
+
+                                {{-- Condition Photos --}}
+                                @if ($report->photos->isNotEmpty())
+                                    <div class="mb-4">
+                                        <h4 class="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                                            {{ __('appraisals.inspection_photos') }}
+                                        </h4>
+                                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            @foreach ($report->photos as $photo)
+                                                <div class="rounded-lg overflow-hidden border border-border">
+                                                    <img src="{{ asset('storage/' . $photo->image_path) }}"
+                                                        alt="{{ $photo->caption ?? 'Condition photo' }}"
+                                                        class="w-full h-28 object-cover">
+                                                    @if ($photo->caption)
+                                                        <p class="p-1.5 text-xs text-center text-text-secondary bg-surface border-t border-border truncate">
+                                                            {{ $photo->caption }}
+                                                        </p>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                            @else
+                                <div class="p-4 bg-background rounded-lg text-center text-sm text-text-secondary">
+                                    <x-heroicon-o-clock class="w-8 h-8 mx-auto text-text-tertiary mb-2" />
+                                    <p>{{ __('appraisals.inspection_report_pending') }}</p>
+                                </div>
+                            @endif
+
+                            {{-- Mark as Sold button — only when status is inspected --}}
+                            @if ($appraisal->status === 'inspected')
+                                <div class="mt-5 pt-5 border-t border-border">
+                                    <p class="text-xs text-text-secondary mb-3">
+                                        {{ __('appraisals.mark_sold_hint') }}
+                                    </p>
+                                    <form action="{{ route('appraisals.mark-sold', $appraisal) }}" method="POST"
+                                        onsubmit="return confirm('{{ __('appraisals.mark_sold_confirm') }}')">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full py-2.5 px-4 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                                            <x-heroicon-o-check-badge class="w-5 h-5" />
+                                            {{ __('appraisals.mark_sold_button') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                 </div>
 
                 {{-- RIGHT COLUMN: Admin Actions & Status --}}
@@ -180,14 +327,37 @@
                         <div class="space-y-4">
                             {{-- Status --}}
                             <div>
-                                <x-forms.select name="status" :label="__('appraisals.current_status')">
-                                    @foreach (['draft', 'submitted', 'under_review', 'completed', 'rejected'] as $status)
-                                        <option value="{{ $status }}"
-                                            {{ $appraisal->status === $status ? 'selected' : '' }}>
-                                            {{ __('appraisals.status_' . $status) }}
-                                        </option>
-                                    @endforeach
-                                </x-forms.select>
+                                @if ($isSystemManaged)
+                                    {{-- Read-only status badge for system-managed states --}}
+                                    <label class="block text-sm font-medium text-text-primary mb-1">
+                                        {{ __('appraisals.current_status') }}
+                                    </label>
+                                    @php
+                                        $badgeClasses = match ($appraisal->status) {
+                                            'in_auction' => 'bg-purple-100 text-purple-700',
+                                            'acquired'   => 'bg-teal-100 text-teal-700',
+                                            'inspected'  => 'bg-primary-container text-primary',
+                                            'sold'       => 'bg-gray-900 text-white',
+                                            default      => 'bg-surface-variant text-text-secondary',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-full {{ $badgeClasses }}">
+                                        <x-heroicon-o-lock-closed class="w-3.5 h-3.5" />
+                                        {{ __('appraisals.status_' . $appraisal->status) }}
+                                    </span>
+                                    <p class="mt-1 text-xs text-text-secondary">{{ __('appraisals.status_system_managed') }}</p>
+                                    {{-- Pass current status through the form so update() validation passes --}}
+                                    <input type="hidden" name="status" value="{{ $appraisal->status }}">
+                                @else
+                                    <x-forms.select name="status" :label="__('appraisals.current_status')">
+                                        @foreach (['draft', 'submitted', 'under_review', 'completed', 'rejected'] as $status)
+                                            <option value="{{ $status }}"
+                                                {{ $appraisal->status === $status ? 'selected' : '' }}>
+                                                {{ __('appraisals.status_' . $status) }}
+                                            </option>
+                                        @endforeach
+                                    </x-forms.select>
+                                @endif
                             </div>
 
                             {{-- Final Price --}}

@@ -38,6 +38,16 @@ class AppraisalRequest extends Model
         return $this->hasOne(Auction::class);
     }
 
+    public function inspectionReport()
+    {
+        return $this->hasOne(InspectionReport::class);
+    }
+
+    // Statuses managed by system flows — not settable via the admin edit form
+    public static array $systemManagedStatuses = [
+        'in_auction', 'acquired', 'inspected', 'sold',
+    ];
+
     // * Anggap aja enum
     const STATUS_DRAFT      = 'draft';
     const STATUS_SUBMITTED  = 'submitted';
@@ -46,4 +56,6 @@ class AppraisalRequest extends Model
     const STATUS_REJECTED   = 'rejected';
     const STATUS_IN_AUCTION = 'in_auction';
     const STATUS_ACQUIRED   = 'acquired';
+    const STATUS_INSPECTED  = 'inspected';
+    const STATUS_SOLD       = 'sold';
 }
