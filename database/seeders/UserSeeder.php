@@ -21,6 +21,13 @@ class UserSeeder extends Seeder
             'role' => 'admin',
         ]);
 
+        User::factory()->create([
+            'name' => 'Test Dealer',
+            'email' => 'dealer@gmail.com',
+            'password' => Hash::make('dealer123'),
+            'role' => 'dealer',
+        ]);
+
         User::factory(20)->create();
     }
 }
