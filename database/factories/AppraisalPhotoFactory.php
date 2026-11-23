@@ -17,7 +17,7 @@ class AppraisalPhotoFactory extends Factory
      */
     public function definition(): array
     {
-        // 1. Pilih angka acak antara 1 sampai 6 (sesuai jumlah file Kakak)
+        // 1. Pilih angka acak antara 1 sampai 6
         $fileNumber = fake()->numberBetween(1, 6);
 
         return [
@@ -32,9 +32,11 @@ class AppraisalPhotoFactory extends Factory
                 'Mesin'
             ]),
 
-            // 2. Arahkan ke file JFIF yang sudah ada di folder public
-            // Pastikan file-nya ada di folder: storage/app/public/appraisal_photos/
-            'image_path' => "appraisal_photos/cars-{$fileNumber}.jfif",
+            // 2. Instruct for image
+            // NOTE FOR USER: Please create directory storage/app/public/seed_images/
+            // and place some dummy images named car1.jpg, car2.jpg, ... car6.jpg inside it.
+            // When symlinked, they will be accessible under public/storage/seed_images/carX.jpg
+            'image_path' => "seed_images/car{$fileNumber}.jpg",
         ];
     }
 }
